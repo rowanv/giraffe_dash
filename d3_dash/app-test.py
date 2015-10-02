@@ -26,7 +26,7 @@ class BasicTestCase(unittest.TestCase):
 	def test_d3_visualization_rendered(self):
 		tester = app.test_client(self)
 		response = tester.get('/viz', content_type='html/text')
-		self.assertContains(result, 'svg')
+		self.assertTrue('svg' in response.data)
 
 =======
 >>>>>>> 38572b1172bfb422bc5320733fee86d074a4d05e

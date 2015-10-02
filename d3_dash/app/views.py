@@ -37,6 +37,8 @@ def visualization():
 	df = execute_query(query)
 	df.to_csv('app/static/data.csv')
 	page = '''<html>
+	<body>
+	</body>
 	<script src="/static/d3.v3.min.js"  charset="utf-8"></script>
 	<script type="text/javascript" src='/static/viz.js'></script>
 	</html>'''
