@@ -1,3 +1,7 @@
+from app import app
+
+
+
 from collections import Counter
 from flask import Flask
 import MySQLdb
@@ -5,7 +9,6 @@ import pandas as pd
 
 from pandas.io.sql import read_sql
 
-app = Flask(__name__)
 
 
 
@@ -25,14 +28,14 @@ def execute_query(query, args=()):
 @app.route('/viewdb')
 def viewdb():
 	df = execute_query(query)
-	df.to_csv('static/data.csv')
+	df.to_csv('app/static/data.csv')
 	return('Wrote the dataset')
 
 
 @app.route('/viz')
 def visualization():
 	df = execute_query(query)
-	df.to_csv('static/data.csv')
+	df.to_csv('app/static/data.csv')
 	page = '''<html>
 	<script src="/static/d3.v3.min.js"  charset="utf-8"></script>
 	<script type="text/javascript" src='/static/viz.js'></script>
@@ -41,6 +44,7 @@ def visualization():
 
 
 @app.route('/')
+@app.route('/index')
 def hello_world():
 	return 'Hello from Flask!'
 
@@ -51,6 +55,3 @@ def count_me(input_str):
 	for letter, count in input_counter.most_common():
 		response.append('"{}": {}'.format(letter, count))
 	return '<br>'.join(response)
-
-if __name__ == '__main__':
-	app.run()
