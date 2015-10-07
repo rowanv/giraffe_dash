@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, make_response
+from flask import Flask, make_response, render_template
 from cStringIO import StringIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -14,6 +14,8 @@ import brewer2mpl
 
 app = Flask(__name__)
 db_connection = MySQLdb.connect('localhost', 'root', '', 'sakila')
+
+
 
 def make_matplotlib_pretty():
 
@@ -71,14 +73,7 @@ make_matplotlib_pretty()
 
 @app.route('/')
 def index():
-    return """\
-<html>
-<body>
-<img src="/plot1.png">
-<img src='/plot2.png'>
-<img src='/plot3.png'>
-</body>
-</html>"""
+    return render_template('index.html')
 
 @app.route('/plot1.png')
 def plot1():
