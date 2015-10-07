@@ -96,14 +96,40 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
-def generate_shopping_panel():
 
 
+#Dashboard Views
 
 @app.route('/')
+@app.route('/index.html')
 def index(**kwargs):
     context = {'new_orders': read_new_orders()}
     return render_template('index.html', context=context, **kwargs)
+
+@app.route('/customers.html')
+def customers(**kwargs):
+    context = {}
+    return render_template('customers.html', context=context, **kwargs)
+
+@app.route('/employees.html')
+def employees(**kwargs):
+    context = {}
+    return render_template('employees.html', context=context, **kwargs)
+
+@app.route('/inventory.html')
+def inventory(**kwargs):
+    context = {}
+    return render_template('inventory.html', context=context, **kwargs)
+
+@app.route('/recent_sales.html')
+def recent_sales(**kwargs):
+    context = {}
+    return render_template('recent_sales.html', context=context, **kwargs)
+
+@app.route('/alltime_sales.html')
+def alltime_sales(**kwargs):
+    context = {}
+    return render_template('alltime_sales.html', context=context, **kwargs)
 
 @app.route('/plot1.png')
 def plot1():
