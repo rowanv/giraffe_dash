@@ -12,6 +12,7 @@ import MySQLdb
 from pandas.io.sql import read_sql
 import pandas as pd
 import brewer2mpl
+from math import ceil
 
 #set static folder
 app = Flask(__name__, static_url_path='/static/dist')
@@ -77,9 +78,29 @@ def remove_border(axes=None, top=False, right=False, left=True, bottom=True):
 make_matplotlib_pretty()
 
 
+def read_new_orders():
+    query = '''
+    select sum(amount), payment_date
+    from payment
+    group by payment_date
+    limit 100;
+    '''
+
+    df = read_sql(query, db_connection, coerce_float=False)
+    df.payment_date = pd.to_datetime(df.payment_date)
+    df.set_index('payment_date', inplace=True)
+    print(df.head())
+    orders_today = df.head(1)['sum(amount)'].iloc[0]
+    orders_today = int(ceil(orders_today))
+    #TODO: Fix issue with floating point numbers in data transfer
+    print(orders_today)
+    return orders_today
+
+
 @app.route('/')
-def index():
-    return render_template('index.html')
+def index(**kwargs):
+    context = {'new_orders': read_new_orders()}
+    return render_template('index.html', context=context, **kwargs)
 
 @app.route('/plot1.png')
 def plot1():
