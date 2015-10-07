@@ -6,15 +6,22 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import seaborn as sns
+from flask.ext.bower import Bower
 
 import MySQLdb
 from pandas.io.sql import read_sql
 import pandas as pd
 import brewer2mpl
 
+#set static folder
 app = Flask(__name__)
+Bower(app)
+
+
 db_connection = MySQLdb.connect('localhost', 'root', '', 'sakila')
 
+
+#Static file handling
 
 
 def make_matplotlib_pretty():
