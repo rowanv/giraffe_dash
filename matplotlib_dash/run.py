@@ -96,6 +96,9 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
+def generate_shopping_panel():
+
+
 
 @app.route('/')
 def index(**kwargs):
