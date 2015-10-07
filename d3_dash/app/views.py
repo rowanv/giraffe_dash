@@ -13,7 +13,11 @@ from pandas.io.sql import read_sql
 
 
 
-query = 'select staff_id, year(payment_date), month(payment_date), sum(amount) from payment where year(payment_date)=2005 group by staff_id, year(payment_date), month(payment_date) ;'
+query = '''select staff_id, year(payment_date), month(payment_date), sum(amount)
+from payment
+where year(payment_date)=2005
+group by staff_id, year(payment_date), month(payment_date) ;
+'''
 
 def execute_query(query, args=()):
 	db_connection = MySQLdb.connect('localhost', 'root', '', 'sakila')
@@ -37,9 +41,14 @@ def visualization():
 	df = execute_query(query)
 	df.to_csv('app/static/data.csv')
 	page = '''<html>
+	<head>
+		<link rel='stylesheet' type='text/css' href='/static/nv.d3.css'>
+	</head>
 	<body>
 	</body>
 	<script src="/static/d3.v3.min.js"  charset="utf-8"></script>
+	<script src='/static/nv.d3.min.js' charset='utf-8'></script>
+
 	<script type="text/javascript" src='/static/viz.js'></script>
 	</html>'''
 	return page
