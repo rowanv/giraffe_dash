@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, make_response, render_template
+from flask import Flask, make_response, render_template, send_from_directory
 from cStringIO import StringIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -14,14 +14,13 @@ import pandas as pd
 import brewer2mpl
 
 #set static folder
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static/dist')
 Bower(app)
 
 
 db_connection = MySQLdb.connect('localhost', 'root', '', 'sakila')
 
 
-#Static file handling
 
 
 def make_matplotlib_pretty():
