@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from flask import Flask, make_response, render_template, send_from_directory
-from cStringIO import StringIO
+from flask import Flask, make_response, render_template, send_from_directory, Markup
+#from cStringIO import StringIO
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -96,6 +96,50 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
+def indicator_panels(panel_colour, panel_icon, panel_text):
+    if panel_colour == 'blue':
+        panel_class = 'panel-primary'
+    elif panel_colour == 'green':
+        panel_class = 'panel-green'
+    elif panel_colour == 'yellow':
+        panel_class = 'panel-yellow'
+    elif panel_colour == 'red':
+        panel_class = 'panel-red'
+    if panel_icon == 'shopping_cart':
+        icon_class = 'fa-shopping-cart'
+    elif panel_icon == 'comments':
+        icon_class = 'fa-comments'
+    elif panel_icon == 'tasks':
+        icon_class = 'fa-tasks'
+    elif panel_icon == 'support':
+        icon_class = 'fa-support'
+
+    panel_html = '''
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel {}">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa {} fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">26</div>
+                                    <div>{}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+    '''.format(panel_class, icon_class, panel_text)
+    panel_html = Markup(panel_html)
+    return(panel_html)
 
 
 #Dashboard Views
@@ -103,7 +147,14 @@ def read_new_orders():
 @app.route('/')
 @app.route('/index.html')
 def index(**kwargs):
-    context = {'new_orders': read_new_orders()}
+    context = {'new_orders': read_new_orders(),
+                'panels_html': {
+                    indicator_panels('blue', 'comments', 'New comments!'),
+                    indicator_panels('green', 'tasks', ''),
+                    indicator_panels('yellow', 'shopping_cart', ''),
+                    indicator_panels('red', 'support', '')}}
+    print('in context')
+    print context['panels_html']
     return render_template('index.html', context=context, **kwargs)
 
 @app.route('/customers.html')
@@ -131,7 +182,7 @@ def alltime_sales(**kwargs):
     context = {}
     return render_template('alltime_sales.html', context=context, **kwargs)
 
-@app.route('/plot1.png')
+#@app.route('/plot1.png')
 def plot1():
     query = """\
 select sum(amount), payment_date
@@ -152,7 +203,7 @@ limit 100;
     response.mimetype = 'image/png'
     return response
 
-@app.route('/plot2.png')
+#@app.route('/plot2.png')
 def plot2():
 
 
