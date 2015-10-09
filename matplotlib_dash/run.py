@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from flask import Flask, make_response, render_template, send_from_directory, Markup
 from flask.ext.bower import Bower
 
@@ -39,7 +38,9 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
-def indicator_panels(panel_colour, panel_icon, panel_text):
+
+#Chart Views
+def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):
     panel_colour_to_class_mapping = {
         'blue': 'panel-primary',
         'green': 'panel-green',
@@ -65,7 +66,7 @@ def indicator_panels(panel_colour, panel_icon, panel_text):
                                     <i class="fa {} fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge">26</div>
+                                    <div class="huge">{}</div>
                                     <div>{}</div>
                                 </div>
                             </div>
@@ -79,7 +80,7 @@ def indicator_panels(panel_colour, panel_icon, panel_text):
                         </a>
                     </div>
                 </div>
-    '''.format(panel_class, icon_class, panel_text)
+    '''.format(panel_class, icon_class, panel_num, panel_text)
     panel_html = Markup(panel_html)
     return(panel_html)
 
@@ -129,24 +130,29 @@ def morris_line():
 @app.route('/')
 @app.route('/index.html')
 def index(**kwargs):
-    context = {'new_orders': read_new_orders(),
-                'panels_html': {
-                    indicator_panels('blue', 'comments', 'New comments!'),
-                    indicator_panels('green', 'tasks', ''),
-                    indicator_panels('yellow', 'shopping_cart', ''),
-                    indicator_panels('red', 'support', '')},
-                'line_graph_html': morris_line(),}
+    context = {'panels_html': [
+                    indicator_panels('blue', 'comments',
+                        'New Orders!', read_new_orders()),
+                    indicator_panels('green', 'tasks', '', ''),
+                    indicator_panels('yellow', 'shopping_cart', '', ''),
+                    indicator_panels('red', 'support', '', '')
+                ],
+                'line_graph_html': morris_line(),
+            }
     return render_template('index.html', context=context, **kwargs)
 
 @app.route('/customers.html')
 def customers(**kwargs):
     context = {
-        'panels_html': {
-            indicator_panels('blue', 'tasks', 'Total Customers'),
-            indicator_panels('green', 'tasks', 'Customers Gained Last Month'),
-            indicator_panels('red', 'support', 'Customers Lost Last Month'),
-            indicator_panels('yellow', 'shopping_cart', 'Active Customers')
-        }
+        'panels_html': [
+            indicator_panels('blue', 'tasks', 'Total Customers', ''),
+            indicator_panels('green', 'tasks',
+                'Customers Gained Last Month', ''),
+            indicator_panels('red', 'support',
+                'Customers Lost Last Month', ''),
+            indicator_panels('yellow', 'shopping_cart',
+                'Active Customers', '')
+        ]
     }
     return render_template('customers.html', context=context, **kwargs)
 
@@ -155,8 +161,9 @@ def employees(**kwargs):
     context = {
         'panels_html': {
             indicator_panels('yellow', 'shopping_cart',
-                'Average Sales per Employee'),
-            indicator_panels('blue', 'tasks', 'Employee Retention Rate')
+                'Average Sales per Employee', ''),
+            indicator_panels('blue', 'tasks',
+                'Employee Retention Rate', '')
         }
     }
     return render_template('employees.html', context=context, **kwargs)
@@ -164,31 +171,38 @@ def employees(**kwargs):
 @app.route('/inventory.html')
 def inventory(**kwargs):
     context = {
-        'panels_html': {
-            indicator_panels('blue', 'shopping_cart', 'Films in Inventory'),
-            indicator_panels('green', 'shopping_cart', 'Films Checked Out'),
-            indicator_panels('yellow', 'tasks', 'Avg. Days Film Checked Out'),
-            indicator_panels('red', 'tasks', 'Rentals Returned Late')
-        }
+        'panels_html': [
+            indicator_panels('blue', 'shopping_cart',
+                'Films in Inventory', ''),
+            indicator_panels('green', 'shopping_cart',
+                'Films Checked Out', ''),
+            indicator_panels('yellow', 'tasks',
+                'Avg. Days Film Checked Out', ''),
+            indicator_panels('red', 'tasks',
+                'Rentals Returned Late', '')
+        ]
     }
     return render_template('inventory.html', context=context, **kwargs)
 
 @app.route('/recent_sales.html')
 def recent_sales(**kwargs):
     context = {
-        'panels_html': {
-            indicator_panels('yellow', 'shopping_cart', 'Sales Last Week'),
-            indicator_panels('blue', 'shopping_cart', 'Sales Last Day')
-        }
+        'panels_html': [
+            indicator_panels('yellow', 'shopping_cart',
+                'Sales Last Week', ''),
+            indicator_panels('blue', 'shopping_cart',
+                'Sales Last Day', '')
+        ]
     }
     return render_template('recent_sales.html', context=context, **kwargs)
 
 @app.route('/alltime_sales.html')
 def alltime_sales(**kwargs):
     context = {
-        'panels_html': {
-            indicator_panels('blue', 'shopping_cart', 'All-Time Rentals')
-        }
+        'panels_html': [
+            indicator_panels('blue', 'shopping_cart',
+                'All-Time Rentals', '')
+        ]
     }
     return render_template('alltime_sales.html', context=context, **kwargs)
 
