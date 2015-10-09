@@ -169,6 +169,7 @@ def read_avg_length_time_checked_out():
     response = SingleItemResponse(engine,
         query_avg_length_time_movies_rented)
     result = response.fetch_result()
+    result = '%.2f'%(result)
     return result
 
 def read_rentals_returned_late():
@@ -206,6 +207,22 @@ def read_films_in_inventory():
     response = SingleItemResponse(engine,
     query_films_in_inventory)
     result = response.fetch_result()
+    return result
+
+############
+# Staff
+############
+
+def read_average_rental_by_staff():
+    query_avg_rental_by_staff = '''
+    select avg(total_rented) from (select count(*) as total_rented
+        from rental
+        group by staff_id) a;
+    '''
+    response = SingleItemResponse(engine,
+        query_avg_rental_by_staff)
+    result = response.fetch_result()
+    result = '%0.0f' % (result)
     return result
 
 #Chart Views
@@ -307,7 +324,9 @@ def index(**kwargs):
                         'New Orders!', '1'),
                     indicator_panels('yellow', 'shopping_cart',
                         'Films Checked Out', read_films_checked_out()),
-                    indicator_panels('red', 'support', '', '')
+                    indicator_panels('red', 'support',
+                        'Customers Lost Last Month',
+                        read_customers_lost_last_month()),
                 ],
                 'line_graph_html': morris_line(),
             }
@@ -338,9 +357,10 @@ def employees(**kwargs):
     context = {
         'panels_html': {
             indicator_panels('yellow', 'shopping_cart',
-                'Average Sales per Employee', ''),
+                'Average Sales per Employee',
+                read_average_rental_by_staff()),
             indicator_panels('blue', 'tasks',
-                'Employee Retention Rate', '')
+                'Employee Retention Rate', '100%')
         }
     }
     return render_template('employees.html', context=context, **kwargs)
@@ -366,9 +386,9 @@ def inventory(**kwargs):
 def recent_sales(**kwargs):
     context = {
         'panels_html': [
-            indicator_panels('yellow', 'shopping_cart',
-                'Sales Last Week', read_sales_last_week()),
             indicator_panels('blue', 'shopping_cart',
+                'Sales Last Week', read_sales_last_week()),
+            indicator_panels('yellow', 'shopping_cart',
                 'Sales Last Day', read_sales_last_day()),
         ]
     }

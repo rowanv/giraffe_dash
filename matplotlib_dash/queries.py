@@ -72,4 +72,16 @@ INNER JOIN film ON inventory.film_id = film.film_id
 WHERE rental.return_date IS NULL
 AND rental_date + INTERVAL film.rental_duration DAY < CURRENT_DATE()
 LIMIT 5;
+'''
 
+query_rental_by_staff = '''
+select staff_id, count(*)
+from rental
+group by staff_id
+'''
+
+query_avg_rental_by_staff = '''
+select avg(total_rented) from (select count(*) as total_rented
+	from rental
+	group by staff_id) a;
+'''
