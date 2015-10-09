@@ -8,6 +8,8 @@ import pandas as pd
 import brewer2mpl
 from math import ceil
 
+from models import SingleItemResponse
+
 #set static folder
 app = Flask(__name__, static_url_path='/static/dist')
 Bower(app)
@@ -42,12 +44,10 @@ def read_avg_length_time_checked_out():
     query_avg_length_time_movies_rented = '''
     select AVG(DATEDIFF(return_date, rental_date)) from rental;
     '''
-
-    connection = engine.connect()
-
-    result = connection.execute(query_avg_length_time_movies_rented)
-    avg_length_time_rented = result.fetchone()[0]
-    return avg_length_time_rented
+    response = SingleItemResponse(engine,
+        query_avg_length_time_movies_rented)
+    result = response.fetch_result()
+    return result
 
 def read_rentals_returned_late():
     query_number_rentals_returned_late = '''
@@ -55,10 +55,10 @@ def read_rentals_returned_late():
     from (
     select datediff(return_date, rental_date) rental_length
     from rental where datediff(return_date, rental_date) > 7) a;'''
-    connection = engine.connect()
-    result = connection.execute(query_number_rentals_returned_late)
-    rentals_returned_late = result.fetchone()[0]
-    return rentals_returned_late
+    response = SingleItemResponse(engine,
+        query_number_rentals_returned_late)
+    result = response.fetch_result()
+    return result
 
 #Chart Views
 def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):

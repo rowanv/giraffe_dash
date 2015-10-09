@@ -1,15 +1,14 @@
 from sqlalchemy.engine import create_engine
 
-engine = create_engine('mysql+pymysql://root@localhost/sakila')
-connection = engine.connect()
+class SingleItemResponse(object):
 
-result = connection.execute('''
-    select sum(amount), payment_date
-    from payment
-    group by payment_date
-    limit 100;
-    '''
-	)
-for row in result:
-	print(row)
+	def __init__(self, engine, query):
+		self.query = query
+		self.connection = engine.connect()
+
+	def fetch_result(self):
+		self.result = self.connection.execute(self.query)
+		self.result = self.result.fetchone()[0]
+		return self.result
+
 
