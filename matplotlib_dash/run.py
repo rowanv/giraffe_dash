@@ -97,22 +97,21 @@ def read_new_orders():
     return orders_today
 
 def indicator_panels(panel_colour, panel_icon, panel_text):
-    if panel_colour == 'blue':
-        panel_class = 'panel-primary'
-    elif panel_colour == 'green':
-        panel_class = 'panel-green'
-    elif panel_colour == 'yellow':
-        panel_class = 'panel-yellow'
-    elif panel_colour == 'red':
-        panel_class = 'panel-red'
-    if panel_icon == 'shopping_cart':
-        icon_class = 'fa-shopping-cart'
-    elif panel_icon == 'comments':
-        icon_class = 'fa-comments'
-    elif panel_icon == 'tasks':
-        icon_class = 'fa-tasks'
-    elif panel_icon == 'support':
-        icon_class = 'fa-support'
+    panel_colour_to_class_mapping = {
+        'blue': 'panel-primary',
+        'green': 'panel-green',
+        'yellow': 'panel-yellow',
+        'red': 'panel-red'
+    }
+    panel_icon_to_class_mapping = {
+        'shopping_cart': 'fa-shopping-cart',
+        'comments': 'fa-comments',
+        'tasks': 'fa-tasks',
+        'support': 'fa-support'
+    }
+    panel_class = panel_colour_to_class_mapping[panel_colour]
+    icon_class = panel_icon_to_class_mapping[panel_icon]
+
 
     panel_html = '''
                 <div class="col-lg-3 col-md-6">
@@ -195,27 +194,56 @@ def index(**kwargs):
 
 @app.route('/customers.html')
 def customers(**kwargs):
-    context = {}
+    context = {
+        'panels_html': {
+            indicator_panels('blue', 'tasks', 'Total Customers'),
+            indicator_panels('green', 'tasks', 'Customers Gained Last Month'),
+            indicator_panels('red', 'support', 'Customers Lost Last Month'),
+            indicator_panels('yellow', 'shopping_cart', 'Active Customers')
+        }
+    }
     return render_template('customers.html', context=context, **kwargs)
 
 @app.route('/employees.html')
 def employees(**kwargs):
-    context = {}
+    context = {
+        'panels_html': {
+            indicator_panels('yellow', 'shopping_cart',
+                'Average Sales per Employee'),
+            indicator_panels('blue', 'tasks', 'Employee Retention Rate')
+        }
+    }
     return render_template('employees.html', context=context, **kwargs)
 
 @app.route('/inventory.html')
 def inventory(**kwargs):
-    context = {}
+    context = {
+        'panels_html': {
+            indicator_panels('blue', 'shopping_cart', 'Films in Inventory'),
+            indicator_panels('green', 'shopping_cart', 'Films Checked Out'),
+            indicator_panels('yellow', 'tasks', 'Avg. Days Film Checked Out'),
+            indicator_panels('red', 'tasks', 'Rentals Returned Late')
+        }
+    }
     return render_template('inventory.html', context=context, **kwargs)
 
 @app.route('/recent_sales.html')
 def recent_sales(**kwargs):
-    context = {}
+    context = {
+        'panels_html': {
+            indicator_panels('yellow', 'shopping_cart', 'Sales Last Week'),
+            indicator_panels('blue', 'shopping_cart', 'Sales Last Day')
+        }
+    }
     return render_template('recent_sales.html', context=context, **kwargs)
 
 @app.route('/alltime_sales.html')
 def alltime_sales(**kwargs):
-    context = {}
+    context = {
+        'panels_html': {
+            indicator_panels('blue', 'shopping_cart', 'All-Time Rentals')
+        }
+    }
     return render_template('alltime_sales.html', context=context, **kwargs)
 
 #@app.route('/plot1.png')

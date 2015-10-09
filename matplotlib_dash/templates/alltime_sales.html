@@ -1,1 +1,14 @@
 {% extends 'base_dashboard.html' %}
+
+{% block indicator_panels %}
+
+            <div class="row">
+
+            {% for panel in context.panels_html %}
+                {{ panel }}
+            {% endfor %}
+
+            </div>
+            <!-- /.row -->
+
+{% endblock %}
