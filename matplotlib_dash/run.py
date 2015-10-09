@@ -41,6 +41,75 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
+##############
+# Customes
+##############
+def read_total_customers():
+    query_total_customers = '''
+    select count(*)
+    from customer_list
+    '''
+    response = SingleItemResponse(engine,
+        query_total_customers)
+    result = response.fetch_result()
+    return result
+
+def read_customers_added_last_month():
+    query_customers_added_last_month = '''
+    select count(*)
+    from customer
+    group by year(create_date), month(create_date)
+    order by year(create_date), month(create_date) desc;
+    '''
+    response = SingleItemResponse(engine,
+        query_customers_added_last_month)
+    result = response.fetch_result()
+    return result
+
+
+def read_customers_lost_last_month():
+    query_customers_lost_last_month = '''
+    select count(*)
+    from (
+    /* inactive customers */
+    select *
+    from customer
+    where (create_date != last_update)
+    and (active = FALSE)) inactive_customers
+    group by year(last_update), month(last_update)
+    limit 1;
+    '''
+    response = SingleItemResponse(engine,
+        query_customers_lost_last_month)
+    result = response.fetch_result()
+    return result
+
+def read_number_active_customers():
+    query_active_customers = '''
+    select count(*)
+    from customer
+    where active = True
+    '''
+    response = SingleItemResponse(engine,
+        query_active_customers)
+    result = response.fetch_result()
+    return result
+
+def calc_customer_retention_rate():
+    retention_rate = read_customers_added_last_month() / read_customers_lost_last_month()
+    retention_rate = '%.2f'%(retention_rate)
+    return retention_rate
+
+def read_customers_by_country():
+    query_customers_by_country = '''
+    select country, count(*) as number_customers
+    from customer_list
+    group by country
+    order by number_customers desc'''
+
+##########
+# Sales
+##########
 def read_sales_last_day():
     query_sales_last_day = '''
     select sum(amount)
@@ -67,6 +136,10 @@ def read_sales_last_week():
         query_sales_last_week)
     result = response.fetch_result()
     return '$ ' + str(result)
+
+################
+# Inventory
+################
 
 def read_avg_length_time_checked_out():
     query_avg_length_time_movies_rented = '''
@@ -207,7 +280,7 @@ def morris_line():
 def index(**kwargs):
     context = {'panels_html': [
                     indicator_panels('blue', 'comments',
-                        'New Orders!', read_new_orders()),
+                        'New Orders!', '1'),
                     indicator_panels('green', 'tasks', '', ''),
                     indicator_panels('yellow', 'shopping_cart',
                         'Films Checked Out', read_films_checked_out()),
@@ -221,13 +294,18 @@ def index(**kwargs):
 def customers(**kwargs):
     context = {
         'panels_html': [
-            indicator_panels('blue', 'tasks', 'Total Customers', ''),
-            indicator_panels('green', 'tasks',
-                'Customers Gained Last Month', ''),
-            indicator_panels('red', 'support',
-                'Customers Lost Last Month', ''),
             indicator_panels('yellow', 'shopping_cart',
-                'Active Customers', '')
+                'Active Customers', read_number_active_customers()),
+            indicator_panels('green', 'tasks',
+                'Customers Gained Last Month',
+                read_customers_added_last_month()),
+            indicator_panels('red', 'support',
+                'Customers Lost Last Month',
+                read_customers_lost_last_month()),
+            indicator_panels('blue', 'tasks',
+                'Customer Retention Rate',
+                calc_customer_retention_rate()),
+
         ]
     }
     return render_template('customers.html', context=context, **kwargs)
