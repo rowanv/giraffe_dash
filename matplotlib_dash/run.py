@@ -24,9 +24,10 @@ engine = create_engine('mysql+pymysql://root@localhost/sakila')
 
 def read_new_orders():
     query = '''
-    select sum(amount), payment_date
+    select sum(amount), date(payment_date)
     from payment
-    group by payment_date
+    group by date(payment_date)
+    order by date(payment_date) desc
     limit 100;
     '''
 
@@ -39,6 +40,33 @@ def read_new_orders():
     #TODO: Fix issue with floating point numbers in data transfer
     print(orders_today)
     return orders_today
+
+def read_sales_last_day():
+    query_sales_last_day = '''
+    select sum(amount)
+    from payment
+    group by date(payment_date)
+    order by date(payment_date) desc
+    limit 1;
+    '''
+    response = SingleItemResponse(engine,
+        query_sales_last_day)
+    result = response.fetch_result()
+    return '$ ' + str(result)
+
+def read_sales_last_week():
+    query_sales_last_week = '''
+    select sum(amount_day)
+    from (select sum(amount) as amount_day, date(payment_date)
+    from payment
+    group by date(payment_date)
+    order by date(payment_date) desc
+    limit 7) a;
+    '''
+    response = SingleItemResponse(engine,
+        query_sales_last_week)
+    result = response.fetch_result()
+    return '$ ' + str(result)
 
 def read_avg_length_time_checked_out():
     query_avg_length_time_movies_rented = '''
@@ -238,9 +266,9 @@ def recent_sales(**kwargs):
     context = {
         'panels_html': [
             indicator_panels('yellow', 'shopping_cart',
-                'Sales Last Week', ''),
+                'Sales Last Week', read_sales_last_week()),
             indicator_panels('blue', 'shopping_cart',
-                'Sales Last Day', '')
+                'Sales Last Day', read_sales_last_day())
         ]
     }
     return render_template('recent_sales.html', context=context, **kwargs)
