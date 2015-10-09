@@ -96,9 +96,11 @@ def read_number_active_customers():
     return result
 
 def calc_customer_retention_rate():
-    retention_rate = read_customers_added_last_month() / read_customers_lost_last_month()
+    cust_added = read_customers_added_last_month()
+    cust_lost = read_customers_lost_last_month()
+    retention_rate = 100 * cust_added / (cust_added + cust_lost)
     retention_rate = '%.2f'%(retention_rate)
-    return retention_rate
+    return str(retention_rate) + '%'
 
 def read_customers_by_country():
     query_customers_by_country = '''
@@ -136,6 +138,25 @@ def read_sales_last_week():
         query_sales_last_week)
     result = response.fetch_result()
     return '$ ' + str(result)
+
+def read_sales_all_time():
+    query_sales_all_time = '''
+    select sum(amount)
+    from payment;
+    '''
+    response = SingleItemResponse(engine, query_sales_all_time)
+    result = response.fetch_result()
+    return '$ ' + str(result)
+
+def read_rentals_all_time():
+    query_rentals_all_time = '''
+    select count(*)
+    from rental
+    '''
+    response = SingleItemResponse(engine,
+        query_rentals_all_time)
+    result = response.fetch_result()
+    return result
 
 ################
 # Inventory
@@ -279,9 +300,11 @@ def morris_line():
 @app.route('/index.html')
 def index(**kwargs):
     context = {'panels_html': [
-                    indicator_panels('blue', 'comments',
+                    indicator_panels('blue', 'tasks',
+                        'Customer Retention Rate',
+                        calc_customer_retention_rate()),
+                    indicator_panels('green', 'comments',
                         'New Orders!', '1'),
-                    indicator_panels('green', 'tasks', '', ''),
                     indicator_panels('yellow', 'shopping_cart',
                         'Films Checked Out', read_films_checked_out()),
                     indicator_panels('red', 'support', '', '')
@@ -346,7 +369,7 @@ def recent_sales(**kwargs):
             indicator_panels('yellow', 'shopping_cart',
                 'Sales Last Week', read_sales_last_week()),
             indicator_panels('blue', 'shopping_cart',
-                'Sales Last Day', read_sales_last_day())
+                'Sales Last Day', read_sales_last_day()),
         ]
     }
     return render_template('recent_sales.html', context=context, **kwargs)
@@ -356,7 +379,9 @@ def alltime_sales(**kwargs):
     context = {
         'panels_html': [
             indicator_panels('blue', 'shopping_cart',
-                'All-Time Rentals', '')
+                'All-Time Rentals', read_rentals_all_time()),
+            indicator_panels('yellow', 'shopping_cart',
+                'All-Time Sales', read_sales_all_time()),
         ]
     }
     return render_template('alltime_sales.html', context=context, **kwargs)
