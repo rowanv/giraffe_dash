@@ -60,6 +60,32 @@ def read_rentals_returned_late():
     result = response.fetch_result()
     return result
 
+def read_films_checked_out():
+    query_films_checked_out = '''
+    select count(*)
+    from (
+    select *
+    from rental
+    where return_date is null) a;
+    '''
+    response = SingleItemResponse(engine,
+        query_films_checked_out)
+    result = response.fetch_result()
+    return result
+
+def read_films_in_inventory():
+    query_films_in_inventory = '''
+    select count(*)
+    from (
+    select f.film_id, count(*)
+    from film f join inventory i on f.film_id = i.film_id
+    group by f.film_id) a;
+    '''
+    response = SingleItemResponse(engine,
+    query_films_in_inventory)
+    result = response.fetch_result()
+    return result
+
 #Chart Views
 def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):
     panel_colour_to_class_mapping = {
@@ -155,7 +181,8 @@ def index(**kwargs):
                     indicator_panels('blue', 'comments',
                         'New Orders!', read_new_orders()),
                     indicator_panels('green', 'tasks', '', ''),
-                    indicator_panels('yellow', 'shopping_cart', '', ''),
+                    indicator_panels('yellow', 'shopping_cart',
+                        'Films Checked Out', read_films_checked_out()),
                     indicator_panels('red', 'support', '', '')
                 ],
                 'line_graph_html': morris_line(),
@@ -194,9 +221,9 @@ def inventory(**kwargs):
     context = {
         'panels_html': [
             indicator_panels('blue', 'shopping_cart',
-                'Films in Inventory', ''),
+                'Films in Inventory', read_films_in_inventory()),
             indicator_panels('green', 'shopping_cart',
-                'Films Checked Out', ''),
+                'Films Checked Out', read_films_checked_out()),
             indicator_panels('yellow', 'tasks',
                 'Avg. Days Film Checked Out',
                 read_avg_length_time_checked_out()),
