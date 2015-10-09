@@ -15,7 +15,7 @@ Bower(app)
 
 
 
-db_connection = create_engine('mysql+pymysql://root@localhost/sakila')
+engine = create_engine('mysql+pymysql://root@localhost/sakila')
 #db_connection = engine.connect()
 
 
@@ -28,7 +28,7 @@ def read_new_orders():
     limit 100;
     '''
 
-    df = read_sql(query, db_connection, coerce_float=False)
+    df = read_sql(query, engine, coerce_float=False)
     df.payment_date = pd.to_datetime(df.payment_date)
     df.set_index('payment_date', inplace=True)
     print(df.head())
@@ -38,6 +38,27 @@ def read_new_orders():
     print(orders_today)
     return orders_today
 
+def read_avg_length_time_checked_out():
+    query_avg_length_time_movies_rented = '''
+    select AVG(DATEDIFF(return_date, rental_date)) from rental;
+    '''
+
+    connection = engine.connect()
+
+    result = connection.execute(query_avg_length_time_movies_rented)
+    avg_length_time_rented = result.fetchone()[0]
+    return avg_length_time_rented
+
+def read_rentals_returned_late():
+    query_number_rentals_returned_late = '''
+    select count(*)
+    from (
+    select datediff(return_date, rental_date) rental_length
+    from rental where datediff(return_date, rental_date) > 7) a;'''
+    connection = engine.connect()
+    result = connection.execute(query_number_rentals_returned_late)
+    rentals_returned_late = result.fetchone()[0]
+    return rentals_returned_late
 
 #Chart Views
 def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):
@@ -177,9 +198,10 @@ def inventory(**kwargs):
             indicator_panels('green', 'shopping_cart',
                 'Films Checked Out', ''),
             indicator_panels('yellow', 'tasks',
-                'Avg. Days Film Checked Out', ''),
+                'Avg. Days Film Checked Out',
+                read_avg_length_time_checked_out()),
             indicator_panels('red', 'tasks',
-                'Rentals Returned Late', '')
+                'Rentals Returned Late', read_rentals_returned_late())
         ]
     }
     return render_template('inventory.html', context=context, **kwargs)
