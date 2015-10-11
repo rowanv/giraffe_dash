@@ -14,7 +14,7 @@ count(*) from language l
 join film on l.language_id = film.language_id
 group by l.language_id, l.name;'''
 
-query_sales_by_movie = '''select *
+query_sales_by_genre = '''select *
 from sales_by_film_category;'''
 
 query_sales_by_store = '''select *
@@ -34,11 +34,12 @@ select staff_id, year(payment_date), month(payment_date),
     where year(payment_date)=2005 group by staff_id, year(payment_date), month(payment_date) ;
 '''
 
-query_payments_by_date = '''
-select sum(amount), payment_date
+query_payments_by_date_month = '''
+select year(payment_date), month(payment_date), day(payment_date),
+sum(amount)
 from payment
-group by payment_date
-limit 100;
+where month(payment_date) = 7
+group by year(payment_date), month(payment_date), day(payment_date)
 '''
 
 query_length_time_movies_rented = '''

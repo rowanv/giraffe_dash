@@ -192,6 +192,35 @@ def read_rentals_all_time():
     result = response.fetch_result()
     return result
 
+def read_sales_by_genre():
+    query_sales_by_movie = '''select *
+    from sales_by_film_category;'''
+    response = TableItemResponse(engine,
+        query_sales_by_movie)
+    result = response.fetch_table()
+    result.index += 1
+    result_html = result.to_html(
+        classes='table table-bordered table-hover table-striped',
+        index_names=False)
+    return Markup(result_html)
+
+def read_sales_last_month_over_time():
+    query_payments_by_date_month = '''
+    select year(payment_date), month(payment_date), day(payment_date),
+    sum(amount)
+    from payment
+    where month(payment_date) = 7
+    group by year(payment_date), month(payment_date), day(payment_date)
+    '''
+    response = TableItemResponse(engine,
+        query_payments_by_date_month)
+    result = response.fetch_table()
+    result = result[['day(payment_date)', 'sum(amount)']]
+    result.columns = ['Day', 'Payments']
+    result = result.to_json(orient='records')
+    return Markup(result)
+
+
 ################
 # Inventory
 ################
@@ -431,7 +460,8 @@ def recent_sales(**kwargs):
                 'Sales Last Week', read_sales_last_week()),
             indicator_panels('yellow', 'shopping_cart',
                 'Sales Last Day', read_sales_last_day()),
-        ]
+        ],
+        'sales_last_month_json': read_sales_last_month_over_time(),
     }
     return render_template('recent_sales.html', context=context, **kwargs)
 
@@ -443,7 +473,8 @@ def alltime_sales(**kwargs):
                 'All-Time Rentals', read_rentals_all_time()),
             indicator_panels('yellow', 'shopping_cart',
                 'All-Time Sales', read_sales_all_time()),
-        ]
+        ],
+        'sales_by_genre_table': read_sales_by_genre(),
     }
     return render_template('alltime_sales.html', context=context, **kwargs)
 

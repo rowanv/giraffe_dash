@@ -12,3 +12,36 @@
             <!-- /.row -->
 
 {% endblock %}
+
+{% block body_panels %}
+
+<div id="myfirstchart" style="height: 250px;"></div>
+
+{% endblock %}
+
+{% block end_scripts %}
+
+<script>
+
+var data = {{ context.sales_last_month_json }};
+
+console.log(data);
+
+new Morris.Line({
+  // ID of the element in which to draw the chart.
+  element: 'myfirstchart',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+  data: {{ context.sales_last_month_json }},
+  // The name of the data record attribute that contains x-values.
+  xkey: 'Day',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['Payments'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Payments']
+});
+
+</script>
+
+{% endblock %}
