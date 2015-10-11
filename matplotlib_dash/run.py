@@ -111,7 +111,7 @@ def read_customers_by_country():
     from customer_list
     group by country
     order by number_customers desc
-    limit 10'''
+    limit 10;'''
     response = TableItemResponse(engine, query_customers_by_country)
     result = response.fetch_table()
     result.index += 1
@@ -120,6 +120,27 @@ def read_customers_by_country():
         classes='table table-bordered table-hover table-striped',
         bold_rows=False)
     return Markup(result_html)
+
+def read_customers_lost_by_country():
+    query_customers_lost_by_country = '''
+    select cl.country, count(*) as number_customers
+    from customer_list cl join customer
+    on cl.ID = customer.customer_id
+    where active = FALSE
+    group by country
+    order by number_customers desc
+    limit 10;
+    '''
+    response = TableItemResponse(engine,
+        query_customers_lost_by_country)
+    result = response.fetch_table()
+    result.index += 1
+    result.columns = ['Country', 'Number of Customers Lost']
+    result_html = result.to_html(
+        classes='table table-bordered table-hover table-striped',
+        bold_rows=False)
+    return Markup(result_html)
+
 
 
 ##########
@@ -363,6 +384,7 @@ def customers(**kwargs):
 
         ],
         'customer_origin_table': read_customers_by_country(),
+        'customer_lost_origin_table': read_customers_lost_by_country(),
     }
     return render_template('customers.html', context=context, **kwargs)
 
