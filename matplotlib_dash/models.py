@@ -1,4 +1,5 @@
 from sqlalchemy.engine import create_engine
+import pandas as pd
 
 class SingleItemResponse(object):
 
@@ -12,3 +13,13 @@ class SingleItemResponse(object):
 		return self.result
 
 
+class TableItemResponse(object):
+
+	def __init__(self, engine, query):
+		self.query = query
+		self.engine = engine
+		self.connection = engine.connect()
+
+	def fetch_table(self):
+		df = pd.read_sql(self.query, self.engine)
+		return df

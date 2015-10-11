@@ -8,7 +8,7 @@ import pandas as pd
 import brewer2mpl
 from math import ceil
 
-from models import SingleItemResponse
+from models import SingleItemResponse, TableItemResponse
 
 #set static folder
 app = Flask(__name__, static_url_path='/static/dist')
@@ -42,8 +42,11 @@ def read_new_orders():
     return orders_today
 
 ##############
-# Customes
+# Customers
 ##############
+
+# Indicator Panels
+
 def read_total_customers():
     query_total_customers = '''
     select count(*)
@@ -107,7 +110,17 @@ def read_customers_by_country():
     select country, count(*) as number_customers
     from customer_list
     group by country
-    order by number_customers desc'''
+    order by number_customers desc
+    limit 10'''
+    response = TableItemResponse(engine, query_customers_by_country)
+    result = response.fetch_table()
+    result.index += 1
+    result.columns = ['Country', 'Number of Customers']
+    result_html = result.to_html(
+        classes='table table-bordered table-hover table-striped',
+        bold_rows=False)
+    return Markup(result_html)
+
 
 ##########
 # Sales
@@ -348,7 +361,8 @@ def customers(**kwargs):
                 'Customer Retention Rate',
                 calc_customer_retention_rate()),
 
-        ]
+        ],
+        'customer_origin_table': read_customers_by_country(),
     }
     return render_template('customers.html', context=context, **kwargs)
 
