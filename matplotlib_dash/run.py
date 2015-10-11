@@ -385,6 +385,11 @@ def customers(**kwargs):
         ],
         'customer_origin_table': read_customers_by_country(),
         'customer_lost_origin_table': read_customers_lost_by_country(),
+        'donut_chart': {'active_customers':
+                        read_number_active_customers(),
+                        'inactive_customers':
+                        read_customers_lost_last_month(),
+                        },
     }
     return render_template('customers.html', context=context, **kwargs)
 
