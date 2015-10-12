@@ -78,7 +78,8 @@ new Morris.Donut({
   data: [
     {label: 'Active Customers', value: {{ context.donut_chart.active_customers }} },
     {label: 'Inactive Customers', value: {{ context.donut_chart.inactive_customers }} },
-   	]
+   	],
+  resize: true,
 });
 </script>
 {% endblock %}

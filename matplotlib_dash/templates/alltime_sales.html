@@ -4,6 +4,7 @@
 
             <div class="row">
 
+
             {% for panel in context.panels_html %}
                 {{ panel }}
             {% endfor %}
@@ -15,6 +16,31 @@
 
 {% block body_panels %}
 
-{{ context.sales_by_genre_table }}
+<div class = 'row'>
+	                <div class="col-lg-8">
+
+                	<div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Sales by Genre
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+
+
+								{{ context.sales_by_genre_table }}
+
+								</div>
+							</div>
+                            <!-- /.row -->
+                        </div>
+                		<!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-8 -->
+
+            </div>
+
 
 {% endblock %}
