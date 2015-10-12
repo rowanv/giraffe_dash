@@ -12,3 +12,66 @@
             <!-- /.row -->
 
 {% endblock %}
+
+
+{% block body_panels %}
+			<div class='row'>
+                <div class="col-lg-6">
+
+                	<div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Sales Over Time (Months) by Employee
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+
+
+									<div id="sales_by_employee" style="height: 250px;"></div>
+
+
+
+
+							</div>
+                            <!-- /.row -->
+                        </div>
+                		<!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-8 -->
+
+            </div>
+            <!-- /.row -->
+
+
+{% endblock %}
+
+{% block end_scripts %}
+
+<script>
+
+
+new Morris.Line({
+  // ID of the element in which to draw the chart.
+  element: 'sales_by_employee',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+  data: {{ context.sales_by_employee_table }},
+  // The name of the data record attribute that contains x-values.
+  xkey: 'month(rental_date)',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['1', '2'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Employee 1', 'Employee 2'],
+  //parseTime: false,
+  axes: true,
+  resize: true,
+  parseTime: false,
+  preUnits: '$',
+
+});
+
+</script>
+
+{% endblock %}

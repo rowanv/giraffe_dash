@@ -9,6 +9,17 @@ query_movie_inventory_by_category = '''select fc.category_id, name, count(*)
 from film_category fc join category c on fc.category_id = c.category_id
 group by fc.category_id, name'''
 
+query_sales_by_movie_category = '''
+select fc.category_id, c.name, sum(amount)
+from film_category fc join category c
+on fc.category_id = c.category_id
+join film on film.film_id = fc.film_id
+join inventory i on i.film_id = film.film_id
+join rental on rental.inventory_id = i.inventory_id
+join payment on payment.rental_id = rental.rental_id
+group by fc.category_id, c.name
+'''
+
 query_movie_inventory_by_language = '''select l.language_id, l.name,
 count(*) from language l
 join film on l.language_id = film.language_id
@@ -76,9 +87,10 @@ LIMIT 5;
 '''
 
 query_rental_by_staff = '''
-select staff_id, count(*)
+select staff_id, year(rental_date), month(rental_date), count(*)
 from rental
-group by staff_id
+where year(rental_date) = 2005
+group by staff_id, year(rental_date), month(rental_date);
 '''
 
 query_avg_rental_by_staff = '''

@@ -273,7 +273,7 @@ def read_films_in_inventory():
     return result
 
 ############
-# Staff
+# Staff / Employee
 ############
 
 def read_average_rental_by_staff():
@@ -288,6 +288,26 @@ def read_average_rental_by_staff():
     result = '%0.0f' % (result)
     return result
 
+def read_sales_by_employee_over_time():
+    query_rental_by_staff = '''
+    select staff_id, year(rental_date), month(rental_date),
+    count(*) as total_sales
+    from rental
+    where year(rental_date) = 2005
+    group by staff_id, year(rental_date), month(rental_date);
+    '''
+    response = TableItemResponse(engine,
+        query_rental_by_staff)
+    result = response.fetch_table()
+    result = result[['staff_id', 'month(rental_date)', 'total_sales']]
+    result = result.pivot(index='month(rental_date)',
+        columns='staff_id', values='total_sales')
+    result = result.reset_index()
+    print(result)
+    result_json = result.to_json(orient='records')
+    return Markup(result_json)
+
+################
 #Chart Views
 def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):
     panel_colour_to_class_mapping = {
@@ -431,7 +451,8 @@ def employees(**kwargs):
                 read_average_rental_by_staff()),
             indicator_panels('blue', 'tasks',
                 'Employee Retention Rate', '100%')
-        }
+        },
+        'sales_by_employee_table': read_sales_by_employee_over_time(),
     }
     return render_template('employees.html', context=context, **kwargs)
 
