@@ -272,6 +272,18 @@ def read_films_in_inventory():
     result = response.fetch_result()
     return result
 
+def read_films_in_inventory_by_category():
+    query_movie_inventory_by_category = '''select fc.category_id, name, count(*)
+    from film_category fc join category c on fc.category_id = c.category_id
+    group by fc.category_id, name'''
+    response = TableItemResponse(engine,
+        query_movie_inventory_by_category)
+    result = response.fetch_table()
+    result = result[['name', 'count(*)']]
+    result.columns = ['Category', 'Inventory Count']
+    result_json = result.to_json(orient='records')
+    return Markup(result_json)
+
 ############
 # Staff / Employee
 ############
@@ -476,7 +488,8 @@ def inventory(**kwargs):
                 read_avg_length_time_checked_out()),
             indicator_panels('red', 'tasks',
                 'Rentals Returned Late', read_rentals_returned_late())
-        ]
+        ],
+        'table_films_by_category': read_films_in_inventory_by_category(),
     }
     return render_template('inventory.html', context=context, **kwargs)
 

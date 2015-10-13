@@ -12,3 +12,66 @@
             <!-- /.row -->
 
 {% endblock %}
+
+{% block body_panels %}
+
+			<div class='row'>
+                <div class="col-lg-8">
+
+                	<div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Inventory by Genre
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+
+
+									<div id="films_by_category" style="height: 250px;"></div>
+
+
+
+
+							</div>
+                            <!-- /.row -->
+                        </div>
+                		<!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-8 -->
+
+            </div>
+            <!-- /.row -->
+
+
+
+{% endblock %}
+
+{% block end_scripts %}
+
+<script>
+
+
+new Morris.Bar({
+  // ID of the element in which to draw the chart.
+  element: 'films_by_category',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+  data: {{ context.table_films_by_category }},
+  // The name of the data record attribute that contains x-values.
+  xkey: 'Category',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['Inventory Count'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Inventory Count'],
+  //parseTime: false,
+  axes: true,
+  resize: true,
+  parseTime: false,
+
+});
+
+</script>
+
+{% endblock %}
