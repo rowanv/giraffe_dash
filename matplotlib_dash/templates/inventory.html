@@ -28,9 +28,6 @@
 
 									<div id="films_by_category" style="height: 250px;"></div>
 
-
-
-
 							</div>
                             <!-- /.row -->
                         </div>
@@ -39,6 +36,61 @@
                     <!-- /.panel -->
                 </div>
                 <!-- /.col-lg-8 -->
+				<div class='col-lg-4'>
+					<div class='panel panel-default'>
+						<div class='panel-heading'>
+							<i class='fa fa-bar-chart-o fa-fw'></i>
+							Inventory by Language
+						</div>
+						<div class='panel-body'>
+							<div class='row'>
+								<div id='films_by_language' style='height: 250px;'></div>
+							</div>
+							<!-- /.row -->
+						</div>
+						<!-- /.panel-body -->
+					</div>
+					<!-- /.panel -->
+				</div>
+				<!-- /.col-lg-4 -->
+            </div>
+            <!-- /.row -->
+            <div class='row'>
+            	<div class='col-lg-4'>
+            		<div class='panel panel-default'>
+						<div class='panel-heading'>
+							<i class='fa fa-bar-chart-o fa-fw'></i>
+							Inventory by Store ID
+						</div>
+						<div class='panel-body'>
+							<div class='row'>
+								<div id='films_by_store' style='height: 250px;'></div>
+							</div>
+							<!-- /.row -->
+						</div>
+						<!-- /.panel-body -->
+					</div>
+					<!-- /.panel -->
+				</div>
+				<!-- /.col-lg-4 -->
+				<div class='col-lg-8'>
+					<div class='panel panel-default'>
+						<div class='panel-heading'>
+							<i class='fa fa-bar-chart-o fa-fw'></i>
+								Top Rented Films
+							</div>
+							<div class='panel-body'>
+								<div class='row' style='overflow:auto; height:250px'>
+					                {{ context.table_top_rented_films }}
+					            							</div>
+							<!-- /.row -->
+						</div>
+						<!-- /.panel-body -->
+					</div>
+					<!-- /.panel -->
+				</div>
+				<!-- /.col-lg-6 -->
+
 
             </div>
             <!-- /.row -->
@@ -50,8 +102,6 @@
 {% block end_scripts %}
 
 <script>
-
-
 new Morris.Bar({
   // ID of the element in which to draw the chart.
   element: 'films_by_category',
@@ -72,6 +122,28 @@ new Morris.Bar({
 
 });
 
+
+new Morris.Donut({
+  element: 'films_by_language',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+  data: [
+    {label: 'English', value: 958 },
+    ],
+  resize: true,
+});
+
+
+new Morris.Bar({
+	element: 'films_by_store',
+	data: {{ context.table_films_by_store }},
+	xkey: 'Store ID',
+	ykeys: ['Number of Films'],
+	labels: ['Number of Films'],
+	axes: true,
+	resize: true,
+	parseTime: false,
+});
 </script>
 
 {% endblock %}

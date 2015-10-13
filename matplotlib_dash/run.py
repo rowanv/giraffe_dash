@@ -284,6 +284,35 @@ def read_films_in_inventory_by_category():
     result_json = result.to_json(orient='records')
     return Markup(result_json)
 
+def read_films_in_inventory_by_store():
+    query_films_in_inventory_by_store = '''
+    select store_id, count(*) from inventory group by store_id;
+    '''
+    response = TableItemResponse(engine,
+        query_films_in_inventory_by_store)
+    result = response.fetch_table()
+    result.columns = ['Store ID', 'Number of Films']
+    result_json = result.to_json(orient='records')
+    return Markup(result_json)
+
+def read_films_in_inventory_most_rented():
+    query_top_rented_films = '''
+    select f.film_id, f.title, f.release_year, count(*) as number_rentals
+    from film f join inventory
+    on inventory.film_id = f.film_id
+    join rental on rental.inventory_id = inventory.inventory_id
+    group by f.film_id, f.title, f.release_year
+    order by number_rentals desc
+    limit 50;
+    '''
+    response = TableItemResponse(engine,
+        query_top_rented_films)
+    result = response.fetch_table()
+    result_html = result.to_html(
+        classes='table table-bordered table-hover table-striped',
+        bold_rows=False)
+    return Markup(result_html)
+
 ############
 # Staff / Employee
 ############
@@ -480,7 +509,7 @@ def inventory(**kwargs):
     context = {
         'panels_html': [
             indicator_panels('blue', 'shopping_cart',
-                'Films in Inventory', read_films_in_inventory()),
+                'Films Titles in Inventory', read_films_in_inventory()),
             indicator_panels('green', 'shopping_cart',
                 'Films Checked Out', read_films_checked_out()),
             indicator_panels('yellow', 'tasks',
@@ -490,6 +519,8 @@ def inventory(**kwargs):
                 'Rentals Returned Late', read_rentals_returned_late())
         ],
         'table_films_by_category': read_films_in_inventory_by_category(),
+        'table_films_by_store': read_films_in_inventory_by_store(),
+        'table_top_rented_films': read_films_in_inventory_most_rented(),
     }
     return render_template('inventory.html', context=context, **kwargs)
 
