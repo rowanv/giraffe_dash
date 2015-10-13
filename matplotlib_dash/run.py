@@ -394,69 +394,7 @@ def morris_line():
     line_graph_html = Markup(line_graph_html)
     return line_graph_html
 
-def populate_base_notifications_panel():
-    html = '''
 
-                                        <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bell fa-fw"></i> Notifications Panel
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="list-group">
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-comment fa-fw"></i> New Comment
-                                    <span class="pull-right text-muted small"><em>4 minutes ago</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-twitter fa-fw"></i> 3 New Followers
-                                    <span class="pull-right text-muted small"><em>12 minutes ago</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-envelope fa-fw"></i> Message Sent
-                                    <span class="pull-right text-muted small"><em>27 minutes ago</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-tasks fa-fw"></i> New Task
-                                    <span class="pull-right text-muted small"><em>43 minutes ago</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-upload fa-fw"></i> Server Rebooted
-                                    <span class="pull-right text-muted small"><em>11:32 AM</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-bolt fa-fw"></i> Server Crashed!
-                                    <span class="pull-right text-muted small"><em>11:13 AM</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-warning fa-fw"></i> Server Not Responding
-                                    <span class="pull-right text-muted small"><em>10:57 AM</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-shopping-cart fa-fw"></i> New Order Placed
-                                    <span class="pull-right text-muted small"><em>9:49 AM</em>
-                                    </span>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <i class="fa fa-money fa-fw"></i> Payment Received
-                                    <span class="pull-right text-muted small"><em>Yesterday</em>
-                                    </span>
-                                </a>
-                            </div>
-                            <!-- /.list-group -->
-                            <a href="#" class="btn btn-default btn-block">View All Alerts</a>
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-    '''
-    return Markup(html)
 
 #Dashboard Views
 
@@ -481,7 +419,6 @@ def index(**kwargs):
                         'inactive_customers':
                         read_customers_lost_last_month(),
                         },
-                'base_notifications_panel': populate_base_notifications_panel(),
             }
     return render_template('index.html', context=context, **kwargs)
 
@@ -515,13 +452,13 @@ def customers(**kwargs):
 @app.route('/employees.html')
 def employees(**kwargs):
     context = {
-        'panels_html': {
+        'panels_html': [
             indicator_panels('yellow', 'shopping_cart',
                 'Average Sales per Employee',
-                read_average_rental_by_staff()),
+                '$' + str(read_average_rental_by_staff())),
             indicator_panels('blue', 'tasks',
                 'Employee Retention Rate', '100%')
-        },
+        ],
         'sales_by_employee_table': read_sales_by_employee_over_time(),
     }
     return render_template('employees.html', context=context, **kwargs)
