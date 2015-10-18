@@ -57,18 +57,31 @@ def read_total_customers():
     result = response.fetch_result()
     return result
 
+query_customers_added_last_month = '''
+select count(*)
+from customer
+group by year(create_date), month(create_date)
+order by year(create_date), month(create_date) desc;
+'''
+
 def read_customers_added_last_month():
-    query_customers_added_last_month = '''
-    select count(*)
-    from customer
-    group by year(create_date), month(create_date)
-    order by year(create_date), month(create_date) desc;
-    '''
+
     response = SingleItemResponse(engine,
         query_customers_added_last_month)
     result = response.fetch_result()
     return result
 
+query_customers_lost_last_month = '''
+select count(*)
+from (
+/* inactive customers */
+select *
+from customer
+where (create_date != last_update)
+and (active = FALSE)) inactive_customers
+group by year(last_update), month(last_update)
+limit 1;
+'''
 
 def read_customers_lost_last_month():
     query_customers_lost_last_month = '''
@@ -86,6 +99,12 @@ def read_customers_lost_last_month():
         query_customers_lost_last_month)
     result = response.fetch_result()
     return result
+
+query_active_customers = '''
+select count(*)
+from customer
+where active = True
+'''
 
 def read_number_active_customers():
     query_active_customers = '''
@@ -441,6 +460,8 @@ def index(**kwargs):
     green_panel = IndicatorPanel(engine, None)
     green_panel.set_values('green', 'comments', 'New Orders!')
     green_panel.panel_num = ('1')
+    red_panel = IndicatorPanel(engine, query_customers_lost_last_month)
+    red_panel.set_values('red', 'support', 'Customers Lost Last Month')
 
     context = {'panels_html': [
                     indicator_panels('blue', 'tasks',
@@ -449,9 +470,7 @@ def index(**kwargs):
                     green_panel.get_html_rep(),
                     indicator_panels('yellow', 'shopping_cart',
                         'Films Checked Out', read_films_checked_out()),
-                    indicator_panels('red', 'support',
-                        'Customers Lost Last Month',
-                        read_customers_lost_last_month()),
+                    red_panel.get_html_rep(),
                 ],
                 'line_graph_html': morris_line(),
                 'donut_chart': {'active_customers':
@@ -464,16 +483,18 @@ def index(**kwargs):
 
 @app.route('/customers.html')
 def customers(**kwargs):
+    yellow_panel = IndicatorPanel(engine, query_active_customers)
+    yellow_panel.set_values('yellow', 'shopping_cart', 'Active Customers')
+    green_panel = IndicatorPanel(engine, query_customers_added_last_month)
+    green_panel.set_values('green', 'tasks', 'Customers Gained Last Month')
+    red_panel = IndicatorPanel(engine, query_customers_lost_last_month)
+    red_panel.set_values('red', 'support', 'Customers Lost Last Month')
+
     context = {
         'panels_html': [
-            indicator_panels('yellow', 'shopping_cart',
-                'Active Customers', read_number_active_customers()),
-            indicator_panels('green', 'tasks',
-                'Customers Gained Last Month',
-                read_customers_added_last_month()),
-            indicator_panels('red', 'support',
-                'Customers Lost Last Month',
-                read_customers_lost_last_month()),
+            yellow_panel.get_html_rep(),
+            green_panel.get_html_rep(),
+            red_panel.get_html_rep(),
             indicator_panels('blue', 'tasks',
                 'Customer Retention Rate',
                 calc_customer_retention_rate()),
