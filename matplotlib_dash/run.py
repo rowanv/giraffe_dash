@@ -155,6 +155,15 @@ def read_customers_lost_by_country():
 ##########
 # Sales
 ##########
+
+query_sales_last_day = '''
+select sum(amount)
+from payment
+group by date(payment_date)
+order by date(payment_date) desc
+limit 1;
+'''
+
 def read_sales_last_day():
     query_sales_last_day = '''
     select sum(amount)
@@ -177,25 +186,17 @@ order by date(payment_date) desc
 limit 7) a;
 '''
 
+query_sales_all_time = '''
+select sum(amount)
+from payment;
+'''
 
-def read_sales_all_time():
-    query_sales_all_time = '''
-    select sum(amount)
-    from payment;
-    '''
-    response = SingleItemResponse(engine, query_sales_all_time)
-    result = response.fetch_result()
-    return '$ ' + str(result)
+query_rentals_all_time = '''
+select count(*)
+from rental
+'''
 
-def read_rentals_all_time():
-    query_rentals_all_time = '''
-    select count(*)
-    from rental
-    '''
-    response = SingleItemResponse(engine,
-        query_rentals_all_time)
-    result = response.fetch_result()
-    return result
+
 
 def read_sales_by_genre():
     query_sales_by_movie = '''select *
@@ -533,13 +534,12 @@ def recent_sales(**kwargs):
     blue_panel = IndicatorPanel(engine,query_sales_last_week)
     blue_panel.set_values('blue', 'shopping_cart', 'Sales Last Week')
     blue_panel.panel_num = '$' + str(blue_panel.panel_num)
-    yellow_panel = IndicatorPanel(engine, None) #add query
+    yellow_panel = IndicatorPanel(engine, query_sales_last_day)
     yellow_panel.set_values('yellow', 'shopping_cart', 'Sales Last Day')
     context = {
         'panels_html': [
             blue_panel.get_html_rep(),
-            indicator_panels('yellow', 'shopping_cart',
-                'Sales Last Day', read_sales_last_day()),
+            yellow_panel.get_html_rep(),
         ],
         'sales_last_month_json': read_sales_last_month_over_time(),
     }
@@ -547,12 +547,15 @@ def recent_sales(**kwargs):
 
 @app.route('/alltime_sales.html')
 def alltime_sales(**kwargs):
+    blue_panel = IndicatorPanel(engine, query_rentals_all_time)
+    blue_panel.set_values('blue', 'shopping_cart', 'All-Time Rentals')
+    yellow_panel = IndicatorPanel(engine, query_sales_all_time)
+    yellow_panel.set_values('yellow', 'shopping_cart', 'All-Time Sales')
+    yellow_panel.panel_num = '$ ' + str(yellow_panel.panel_num)
     context = {
         'panels_html': [
-            indicator_panels('blue', 'shopping_cart',
-                'All-Time Rentals', read_rentals_all_time()),
-            indicator_panels('yellow', 'shopping_cart',
-                'All-Time Sales', read_sales_all_time()),
+            blue_panel.get_html_rep(),
+            yellow_panel.get_html_rep(),
         ],
         'sales_by_genre_table': read_sales_by_genre(),
     }
