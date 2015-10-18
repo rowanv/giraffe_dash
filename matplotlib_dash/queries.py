@@ -98,3 +98,16 @@ select avg(total_rented) from (select count(*) as total_rented
 	from rental
 	group by staff_id) a;
 '''
+
+query_top_rented_films = '''
+select f.film_id, f.title, f.release_year, count(*) as number_rentals
+from film f join inventory
+on inventory.film_id = f.film_id
+join rental on rental.inventory_id = inventory.inventory_id
+group by f.film_id, f.title, f.release_year
+order by number_rentals desc
+limit 50;
+'''
+
+
+

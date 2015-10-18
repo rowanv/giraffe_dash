@@ -8,7 +8,7 @@ import pandas as pd
 import brewer2mpl
 from math import ceil
 
-from models import SingleItemResponse, TableItemResponse
+from models import SingleItemResponse, TableItemResponse, Table
 
 #set static folder
 app = Flask(__name__, static_url_path='/static/dist')
@@ -131,7 +131,7 @@ def read_customers_lost_by_country():
     order by number_customers desc
     limit 10;
     '''
-    response = TableItemResponse(engine,
+    '''response = TableItemResponse(engine,
         query_customers_lost_by_country)
     result = response.fetch_table()
     result.index += 1
@@ -139,8 +139,11 @@ def read_customers_lost_by_country():
     result_html = result.to_html(
         classes='table table-bordered table-hover table-striped',
         bold_rows=False)
-    return Markup(result_html)
-
+    return Markup(result_html)'''
+    this_table = Table(engine, query_customers_lost_by_country)
+    columns = ['Country', 'Number of Customers Lost']
+    html_rep = this_table.get_html_rep(columns)
+    return html_rep
 
 
 ##########
