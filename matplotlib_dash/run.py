@@ -112,14 +112,10 @@ def read_customers_by_country():
     group by country
     order by number_customers desc
     limit 10;'''
-    response = TableItemResponse(engine, query_customers_by_country)
-    result = response.fetch_table()
-    result.index += 1
-    result.columns = ['Country', 'Number of Customers']
-    result_html = result.to_html(
-        classes='table table-bordered table-hover table-striped',
-        bold_rows=False)
-    return Markup(result_html)
+    this_table = Table(engine, query_customers_by_country)
+    columns = ['Country', 'Number of Customers']
+    html_rep = this_table.get_html_rep(columns)
+    return html_rep
 
 def read_customers_lost_by_country():
     query_customers_lost_by_country = '''
@@ -131,15 +127,6 @@ def read_customers_lost_by_country():
     order by number_customers desc
     limit 10;
     '''
-    '''response = TableItemResponse(engine,
-        query_customers_lost_by_country)
-    result = response.fetch_table()
-    result.index += 1
-    result.columns = ['Country', 'Number of Customers Lost']
-    result_html = result.to_html(
-        classes='table table-bordered table-hover table-striped',
-        bold_rows=False)
-    return Markup(result_html)'''
     this_table = Table(engine, query_customers_lost_by_country)
     columns = ['Country', 'Number of Customers Lost']
     html_rep = this_table.get_html_rep(columns)
@@ -198,14 +185,10 @@ def read_rentals_all_time():
 def read_sales_by_genre():
     query_sales_by_movie = '''select *
     from sales_by_film_category;'''
-    response = TableItemResponse(engine,
-        query_sales_by_movie)
-    result = response.fetch_table()
-    result.index += 1
-    result_html = result.to_html(
-        classes='table table-bordered table-hover table-striped',
-        index_names=False)
-    return Markup(result_html)
+    this_table = Table(engine, query_sales_by_movie)
+    columns = ['Category', 'Total Sales']
+    html_rep = this_table.get_html_rep(columns)
+    return html_rep
 
 def read_sales_last_month_over_time():
     query_payments_by_date_month = '''
@@ -222,6 +205,15 @@ def read_sales_last_month_over_time():
     result.columns = ['Day', 'Payments']
     result = result.to_json(orient='records')
     return Markup(result)
+    '''
+    TODO: refactor this
+    #this is different, need json
+    this_table = Table(engine, query_customers_lost_by_country)
+    this_table.df = this_table.df[['day(payment_date)', 'sum(amount)']]
+    columns = ['Day', 'Payments']
+    html_rep = this_table.get_html_rep(columns)
+    return html_rep
+    '''
 
 
 ################
@@ -308,13 +300,13 @@ def read_films_in_inventory_most_rented():
     order by number_rentals desc
     limit 50;
     '''
-    response = TableItemResponse(engine,
-        query_top_rented_films)
-    result = response.fetch_table()
-    result_html = result.to_html(
-        classes='table table-bordered table-hover table-striped',
-        bold_rows=False)
-    return Markup(result_html)
+    this_table = Table(engine, query_top_rented_films)
+    columns = ['Film ID', 'Title', 'Release Year', 'Number of Rentals']
+    html_rep = this_table.get_html_rep(columns)
+    return html_rep
+
+
+
 
 ############
 # Staff / Employee

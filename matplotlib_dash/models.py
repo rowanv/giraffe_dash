@@ -38,14 +38,11 @@ class Table(Vignette):
     def __init__(self, engine, query):
         Vignette.__init__(self, engine, query)
         self.response = TableItemResponse(engine, self.query)
-
-    def get_dataframe(self):
-        df = pd.read_sql(self.query, self.engine)
-        return df
+        self.df = self.response.fetch_table()
 
     def get_html_rep(self, columns):
         '''Returns html string representing Table object'''
-        result = self.response.fetch_table()
+        result = self.df
         result.index += 1
         result.columns = columns
         result_html = result.to_html(
