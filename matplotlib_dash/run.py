@@ -8,7 +8,7 @@ import pandas as pd
 import brewer2mpl
 from math import ceil
 
-from models import SingleItemResponse, TableItemResponse, Table
+from models import SingleItemResponse, TableItemResponse, Table, IndicatorPanel
 
 #set static folder
 app = Flask(__name__, static_url_path='/static/dist')
@@ -437,12 +437,16 @@ def morris_line():
 @app.route('/')
 @app.route('/index.html')
 def index(**kwargs):
+
+    green_panel = IndicatorPanel(engine, None)
+    green_panel.set_values('green', 'comments', 'New Orders!')
+    green_panel.panel_num = ('1')
+
     context = {'panels_html': [
                     indicator_panels('blue', 'tasks',
                         'Customer Retention Rate',
                         calc_customer_retention_rate()),
-                    indicator_panels('green', 'comments',
-                        'New Orders!', '1'),
+                    green_panel.get_html_rep(),
                     indicator_panels('yellow', 'shopping_cart',
                         'Films Checked Out', read_films_checked_out()),
                     indicator_panels('red', 'support',
@@ -487,13 +491,15 @@ def customers(**kwargs):
 
 @app.route('/employees.html')
 def employees(**kwargs):
+    blue_panel = IndicatorPanel(engine, None)
+    blue_panel.set_values('blue', 'tasks', 'Employee Retetention Rate')
+    blue_panel.panel_num = ('100%')
     context = {
         'panels_html': [
             indicator_panels('yellow', 'shopping_cart',
                 'Average Sales per Employee',
                 '$' + str(read_average_rental_by_staff())),
-            indicator_panels('blue', 'tasks',
-                'Employee Retention Rate', '100%')
+            blue_panel.get_html_rep()
         ],
         'sales_by_employee_table': read_sales_by_employee_over_time(),
     }
