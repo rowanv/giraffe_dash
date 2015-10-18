@@ -168,19 +168,15 @@ def read_sales_last_day():
     result = response.fetch_result()
     return '$ ' + str(result)
 
-def read_sales_last_week():
-    query_sales_last_week = '''
-    select sum(amount_day)
-    from (select sum(amount) as amount_day, date(payment_date)
-    from payment
-    group by date(payment_date)
-    order by date(payment_date) desc
-    limit 7) a;
-    '''
-    response = SingleItemResponse(engine,
-        query_sales_last_week)
-    result = response.fetch_result()
-    return '$ ' + str(result)
+query_sales_last_week = '''
+select sum(amount_day)
+from (select sum(amount) as amount_day, date(payment_date)
+from payment
+group by date(payment_date)
+order by date(payment_date) desc
+limit 7) a;
+'''
+
 
 def read_sales_all_time():
     query_sales_all_time = '''
@@ -239,52 +235,31 @@ def read_sales_last_month_over_time():
 # Inventory
 ################
 
-def read_avg_length_time_checked_out():
-    query_avg_length_time_movies_rented = '''
-    select AVG(DATEDIFF(return_date, rental_date)) from rental;
-    '''
-    response = SingleItemResponse(engine,
-        query_avg_length_time_movies_rented)
-    result = response.fetch_result()
-    result = '%.2f'%(result)
-    return result
+query_avg_length_time_movies_rented = '''
+select AVG(DATEDIFF(return_date, rental_date)) from rental;
+'''
+query_number_rentals_returned_late = '''
+select count(*)
+from (
+select datediff(return_date, rental_date) rental_length
+from rental where datediff(return_date, rental_date) > 7) a;'''
 
-def read_rentals_returned_late():
-    query_number_rentals_returned_late = '''
-    select count(*)
-    from (
-    select datediff(return_date, rental_date) rental_length
-    from rental where datediff(return_date, rental_date) > 7) a;'''
-    response = SingleItemResponse(engine,
-        query_number_rentals_returned_late)
-    result = response.fetch_result()
-    return result
+query_films_checked_out = '''
+select count(*)
+from (
+select *
+from rental
+where return_date is null) a;
+'''
 
-def read_films_checked_out():
-    query_films_checked_out = '''
-    select count(*)
-    from (
-    select *
-    from rental
-    where return_date is null) a;
-    '''
-    response = SingleItemResponse(engine,
-        query_films_checked_out)
-    result = response.fetch_result()
-    return result
+query_films_in_inventory = '''
+select count(*)
+from (
+select f.film_id, count(*)
+from film f join inventory i on f.film_id = i.film_id
+group by f.film_id) a;
+'''
 
-def read_films_in_inventory():
-    query_films_in_inventory = '''
-    select count(*)
-    from (
-    select f.film_id, count(*)
-    from film f join inventory i on f.film_id = i.film_id
-    group by f.film_id) a;
-    '''
-    response = SingleItemResponse(engine,
-    query_films_in_inventory)
-    result = response.fetch_result()
-    return result
 
 def read_films_in_inventory_by_category():
     query_movie_inventory_by_category = '''select fc.category_id, name, count(*)
@@ -331,17 +306,12 @@ def read_films_in_inventory_most_rented():
 # Staff / Employee
 ############
 
-def read_average_rental_by_staff():
-    query_avg_rental_by_staff = '''
-    select avg(total_rented) from (select count(*) as total_rented
-        from rental
-        group by staff_id) a;
-    '''
-    response = SingleItemResponse(engine,
-        query_avg_rental_by_staff)
-    result = response.fetch_result()
-    result = '%0.0f' % (result)
-    return result
+query_avg_rental_by_staff = '''
+select avg(total_rented) from (select count(*) as total_rented
+    from rental
+    group by staff_id) a;
+'''
+
 
 def read_sales_by_employee_over_time():
     query_rental_by_staff = '''
@@ -462,14 +432,16 @@ def index(**kwargs):
     green_panel.panel_num = ('1')
     red_panel = IndicatorPanel(engine, query_customers_lost_last_month)
     red_panel.set_values('red', 'support', 'Customers Lost Last Month')
+    blue_panel = IndicatorPanel(engine, None)
+    blue_panel.set_values('blue', 'tasks', 'Customer Retention Rate')
+    blue_panel.panel_num = calc_customer_retention_rate()
+    yellow_panel = IndicatorPanel(engine, query_films_checked_out)
+    yellow_panel.set_values('yellow', 'shopping_cart', 'Films Checked Out')
 
     context = {'panels_html': [
-                    indicator_panels('blue', 'tasks',
-                        'Customer Retention Rate',
-                        calc_customer_retention_rate()),
+                    blue_panel.get_html_rep(),
                     green_panel.get_html_rep(),
-                    indicator_panels('yellow', 'shopping_cart',
-                        'Films Checked Out', read_films_checked_out()),
+                    yellow_panel.get_html_rep(),
                     red_panel.get_html_rep(),
                 ],
                 'line_graph_html': morris_line(),
@@ -489,15 +461,15 @@ def customers(**kwargs):
     green_panel.set_values('green', 'tasks', 'Customers Gained Last Month')
     red_panel = IndicatorPanel(engine, query_customers_lost_last_month)
     red_panel.set_values('red', 'support', 'Customers Lost Last Month')
-
+    blue_panel = IndicatorPanel(engine, None)
+    blue_panel.set_values('blue', 'tasks', 'Customer Retention Rate')
+    blue_panel.panel_num = calc_customer_retention_rate()
     context = {
         'panels_html': [
             yellow_panel.get_html_rep(),
             green_panel.get_html_rep(),
             red_panel.get_html_rep(),
-            indicator_panels('blue', 'tasks',
-                'Customer Retention Rate',
-                calc_customer_retention_rate()),
+            blue_panel.get_html_rep(),
 
         ],
         'customer_origin_table': read_customers_by_country(),
@@ -515,11 +487,14 @@ def employees(**kwargs):
     blue_panel = IndicatorPanel(engine, None)
     blue_panel.set_values('blue', 'tasks', 'Employee Retetention Rate')
     blue_panel.panel_num = ('100%')
+    yellow_panel = IndicatorPanel(engine, query_avg_rental_by_staff)
+    yellow_panel.set_values('yellow', 'shopping_cart',
+        'Average Sales per Employee')
+    yellow_panel.panel_num = '%0.0f' % yellow_panel.panel_num
+    yellow_panel.panel_num = '$' + str(yellow_panel.panel_num)
     context = {
         'panels_html': [
-            indicator_panels('yellow', 'shopping_cart',
-                'Average Sales per Employee',
-                '$' + str(read_average_rental_by_staff())),
+            yellow_panel.get_html_rep(),
             blue_panel.get_html_rep()
         ],
         'sales_by_employee_table': read_sales_by_employee_over_time(),
@@ -528,17 +503,24 @@ def employees(**kwargs):
 
 @app.route('/inventory.html')
 def inventory(**kwargs):
+    blue_panel = IndicatorPanel(engine, query_films_in_inventory)
+    blue_panel.set_values('blue', 'shopping_cart',
+        'Film Titles in Inventory')
+    green_panel = IndicatorPanel(engine, query_films_checked_out)
+    green_panel.set_values('green', 'shopping_cart', 'Films Checked Out')
+    yellow_panel = IndicatorPanel(engine,
+        query_avg_length_time_movies_rented)
+    yellow_panel.set_values('yellow', 'tasks',
+        'Avg. Days Film Checked Out')
+    yellow_panel.panel_num = '%.2f' % green_panel.panel_num
+    red_panel = IndicatorPanel(engine, query_number_rentals_returned_late)
+    red_panel.set_values('red', 'tasks', 'Rentals Returned Late')
     context = {
         'panels_html': [
-            indicator_panels('blue', 'shopping_cart',
-                'Films Titles in Inventory', read_films_in_inventory()),
-            indicator_panels('green', 'shopping_cart',
-                'Films Checked Out', read_films_checked_out()),
-            indicator_panels('yellow', 'tasks',
-                'Avg. Days Film Checked Out',
-                read_avg_length_time_checked_out()),
-            indicator_panels('red', 'tasks',
-                'Rentals Returned Late', read_rentals_returned_late())
+            blue_panel.get_html_rep(),
+            green_panel.get_html_rep(),
+            yellow_panel.get_html_rep(),
+            red_panel.get_html_rep(),
         ],
         'table_films_by_category': read_films_in_inventory_by_category(),
         'table_films_by_store': read_films_in_inventory_by_store(),
@@ -548,10 +530,14 @@ def inventory(**kwargs):
 
 @app.route('/recent_sales.html')
 def recent_sales(**kwargs):
+    blue_panel = IndicatorPanel(engine,query_sales_last_week)
+    blue_panel.set_values('blue', 'shopping_cart', 'Sales Last Week')
+    blue_panel.panel_num = '$' + str(blue_panel.panel_num)
+    yellow_panel = IndicatorPanel(engine, None) #add query
+    yellow_panel.set_values('yellow', 'shopping_cart', 'Sales Last Day')
     context = {
         'panels_html': [
-            indicator_panels('blue', 'shopping_cart',
-                'Sales Last Week', read_sales_last_week()),
+            blue_panel.get_html_rep(),
             indicator_panels('yellow', 'shopping_cart',
                 'Sales Last Day', read_sales_last_day()),
         ],
