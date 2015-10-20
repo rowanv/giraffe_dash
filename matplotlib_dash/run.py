@@ -11,74 +11,37 @@ from math import ceil
 from models import SingleItemResponse, TableItemResponse, Table, IndicatorPanel
 import queries as q
 
-#set static folder
+# set static folder
 app = Flask(__name__, static_url_path='/static/dist')
 Bower(app)
 
-
+# TODO: Factor out engine.connect()
 
 
 engine = create_engine('mysql+pymysql://root@localhost/sakila')
 #db_connection = engine.connect()
 
 
-
-def read_new_orders():
-    query = '''
-    select sum(amount), date(payment_date)
-    from payment
-    group by date(payment_date)
-    order by date(payment_date) desc
-    limit 100;
-    '''
-
-    df = read_sql(query, engine, coerce_float=False)
-    df.payment_date = pd.to_datetime(df.payment_date)
-    df.set_index('payment_date', inplace=True)
-    print(df.head())
-    orders_today = df.head(1)['sum(amount)'].iloc[0]
-    orders_today = int(ceil(orders_today))
-    #TODO: Fix issue with floating point numbers in data transfer
-    print(orders_today)
-    return orders_today
-
 ##############
 # Customers
 ##############
 
-# Indicator Panels
-
-def read_total_customers():
-
-    response = SingleItemResponse(engine,
-        q.query_total_customers)
-    result = response.fetch_result()
-    return result
-
-
 
 def read_customers_added_last_month():
-
     response = SingleItemResponse(engine,
-        q.query_customers_added_last_month)
+                                  q.query_customers_added_last_month)
     result = response.fetch_result()
     return result
-
-
 
 def read_customers_lost_last_month():
-
     response = SingleItemResponse(engine,
-        q.query_customers_lost_last_month)
+                                  q.query_customers_lost_last_month)
     result = response.fetch_result()
     return result
 
-
-
 def read_number_active_customers():
-
     response = SingleItemResponse(engine,
-        q.query_active_customers)
+                                  q.query_active_customers)
     result = response.fetch_result()
     return result
 
@@ -86,11 +49,10 @@ def calc_customer_retention_rate():
     cust_added = read_customers_added_last_month()
     cust_lost = read_customers_lost_last_month()
     retention_rate = 100 * cust_added / (cust_added + cust_lost)
-    retention_rate = '%.2f'%(retention_rate)
+    retention_rate = '%.2f' % (retention_rate)
     return str(retention_rate) + '%'
 
 def read_customers_by_country():
-
     this_table = Table(engine, q.query_customers_by_country)
     columns = ['Country', 'Number of Customers']
     html_rep = this_table.get_html_rep(columns)
@@ -102,20 +64,9 @@ def read_customers_lost_by_country():
     html_rep = this_table.get_html_rep(columns)
     return html_rep
 
-
 ##########
 # Sales
 ##########
-
-
-
-def read_sales_last_day():
-    response = SingleItemResponse(engine,
-        q.query_sales_last_day)
-    result = response.fetch_result()
-    return '$ ' + str(result)
-
-
 
 def read_sales_by_genre():
     this_table = Table(engine, q.query_sales_by_movie)
@@ -124,127 +75,54 @@ def read_sales_by_genre():
     return html_rep
 
 def read_sales_last_month_over_time():
-
-    response = TableItemResponse(engine,
-        q.query_payments_by_date_month)
-    result = response.fetch_table()
-    result = result[['day(payment_date)', 'sum(amount)']]
-    result.columns = ['Day', 'Payments']
-    result = result.to_json(orient='records')
-    return Markup(result)
-    '''
-    TODO: refactor this
-    #this is different, need json
-    this_table = Table(engine, query_customers_lost_by_country)
-    this_table.df = this_table.df[['day(payment_date)', 'sum(amount)']]
+    table = Table(engine, q.query_payments_by_date_month)
+    table.df = table.df[['day(payment_date)', 'sum(amount)']]
     columns = ['Day', 'Payments']
-    html_rep = this_table.get_html_rep(columns)
-    return html_rep
-    '''
+    result_json = table.get_json_rep(columns)
+    return result_json
 
 
 ################
 # Inventory
 ################
 
-
-
 def read_films_in_inventory_by_category():
-
-    response = TableItemResponse(engine,
-        q.query_movie_inventory_by_category)
-    result = response.fetch_table()
-    result = result[['name', 'count(*)']]
-    result.columns = ['Category', 'Inventory Count']
-    result_json = result.to_json(orient='records')
-    return Markup(result_json)
+    table = Table(engine, q.query_movie_inventory_by_category)
+    columns = ['Category', 'Inventory Count']
+    table.df = table.df[['name', 'count(*)']]
+    result_json = table.get_json_rep(columns)
+    return result_json
 
 def read_films_in_inventory_by_store():
-
-    response = TableItemResponse(engine,
-        q.query_films_in_inventory_by_store)
-    result = response.fetch_table()
-    result.columns = ['Store ID', 'Number of Films']
-    result_json = result.to_json(orient='records')
-    return Markup(result_json)
+    table = Table(engine, q.query_films_in_inventory_by_store)
+    columns = ['Store ID', 'Number of Films']
+    result_json = table.get_json_rep(columns)
+    return result_json
 
 def read_films_in_inventory_most_rented():
-
     this_table = Table(engine, q.query_top_rented_films)
     columns = ['Film ID', 'Title', 'Release Year', 'Number of Rentals']
     html_rep = this_table.get_html_rep(columns)
     return html_rep
 
 
-
-
 ############
 # Staff / Employee
 ############
 
-
-
 def read_sales_by_employee_over_time():
-
-    response = TableItemResponse(engine,
-        q.query_rental_by_staff)
-    result = response.fetch_table()
-    print(result)
-    result = result[['staff_id', 'month(rental_date)', 'total_sales']]
-    result = result.pivot(index='month(rental_date)',
-        columns='staff_id', values='total_sales')
-    result = result.reset_index()
-    print(result)
-    result_json = result.to_json(orient='records')
+    table = Table(engine, q.query_rental_by_staff)
+    table.df = table.df[['staff_id', 'month(rental_date)', 'total_sales']]
+    table.df = table.df.pivot(index='month(rental_date)',
+                          columns='staff_id', values='total_sales')
+    table.df = table.df.reset_index()
+    result_json = table.df.to_json(orient='records')
     return Markup(result_json)
 
 ################
-#Chart Views
+# Chart Views
 ################
 
-def indicator_panels(panel_colour, panel_icon, panel_text, panel_num):
-    panel_colour_to_class_mapping = {
-        'blue': 'panel-primary',
-        'green': 'panel-green',
-        'yellow': 'panel-yellow',
-        'red': 'panel-red'
-    }
-    panel_icon_to_class_mapping = {
-        'shopping_cart': 'fa-shopping-cart',
-        'comments': 'fa-comments',
-        'tasks': 'fa-tasks',
-        'support': 'fa-support'
-    }
-    panel_class = panel_colour_to_class_mapping[panel_colour]
-    icon_class = panel_icon_to_class_mapping[panel_icon]
-
-
-    panel_html = '''
-                <div class="col-lg-3 col-md-6">
-                    <div class="panel {}">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa {} fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">{}</div>
-                                    <div>{}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="#">
-                            <div class="panel-footer">
-                                <span class="pull-left">View Details</span>
-                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                                <div class="clearfix"></div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-    '''.format(panel_class, icon_class, panel_num, panel_text)
-    panel_html = Markup(panel_html)
-    return(panel_html)
 
 def morris_line():
     '''
@@ -288,8 +166,7 @@ def morris_line():
     return line_graph_html
 
 
-
-#Dashboard Views
+# Dashboard Views
 
 @app.route('/')
 @app.route('/index.html')
@@ -307,19 +184,20 @@ def index(**kwargs):
     yellow_panel.set_values('yellow', 'shopping_cart', 'Films Checked Out')
 
     context = {'panels_html': [
-                    blue_panel.get_html_rep(),
-                    green_panel.get_html_rep(),
-                    yellow_panel.get_html_rep(),
-                    red_panel.get_html_rep(),
-                ],
-                'line_graph_html': morris_line(),
-                'donut_chart': {'active_customers':
+        blue_panel.get_html_rep(),
+        green_panel.get_html_rep(),
+        yellow_panel.get_html_rep(),
+        red_panel.get_html_rep(),
+    ],
+        'line_graph_html': morris_line(),
+        'donut_chart': {'active_customers':
                         read_number_active_customers(),
                         'inactive_customers':
                         read_customers_lost_last_month(),
                         },
-            }
+    }
     return render_template('index.html', context=context, **kwargs)
+
 
 @app.route('/customers.html')
 def customers(**kwargs):
@@ -350,6 +228,7 @@ def customers(**kwargs):
     }
     return render_template('customers.html', context=context, **kwargs)
 
+
 @app.route('/employees.html')
 def employees(**kwargs):
     blue_panel = IndicatorPanel(engine, None)
@@ -357,7 +236,7 @@ def employees(**kwargs):
     blue_panel.panel_num = ('100%')
     yellow_panel = IndicatorPanel(engine, q.query_avg_rental_by_staff)
     yellow_panel.set_values('yellow', 'shopping_cart',
-        'Average Sales per Employee')
+                            'Average Sales per Employee')
     yellow_panel.panel_num = '%0.0f' % yellow_panel.panel_num
     yellow_panel.panel_num = '$' + str(yellow_panel.panel_num)
     context = {
@@ -369,20 +248,21 @@ def employees(**kwargs):
     }
     return render_template('employees.html', context=context, **kwargs)
 
+
 @app.route('/inventory.html')
 def inventory(**kwargs):
     blue_panel = IndicatorPanel(engine, q.query_films_in_inventory)
     blue_panel.set_values('blue', 'shopping_cart',
-        'Film Titles in Inventory')
+                          'Film Titles in Inventory')
     green_panel = IndicatorPanel(engine, q.query_films_checked_out)
     green_panel.set_values('green', 'shopping_cart', 'Films Checked Out')
     yellow_panel = IndicatorPanel(engine,
-        q.query_avg_length_time_movies_rented)
+                                  q.query_avg_length_time_movies_rented)
     yellow_panel.set_values('yellow', 'tasks',
-        'Avg. Days Film Checked Out')
+                            'Avg. Days Film Checked Out')
     yellow_panel.panel_num = '%.2f' % green_panel.panel_num
     red_panel = IndicatorPanel(engine,
-        q.query_number_rentals_returned_late)
+                               q.query_number_rentals_returned_late)
     red_panel.set_values('red', 'tasks', 'Rentals Returned Late')
     context = {
         'panels_html': [
@@ -396,6 +276,7 @@ def inventory(**kwargs):
         'table_top_rented_films': read_films_in_inventory_most_rented(),
     }
     return render_template('inventory.html', context=context, **kwargs)
+
 
 @app.route('/recent_sales.html')
 def recent_sales(**kwargs):
@@ -413,6 +294,7 @@ def recent_sales(**kwargs):
     }
     return render_template('recent_sales.html', context=context, **kwargs)
 
+
 @app.route('/alltime_sales.html')
 def alltime_sales(**kwargs):
     blue_panel = IndicatorPanel(engine, q.query_rentals_all_time)
@@ -428,8 +310,6 @@ def alltime_sales(**kwargs):
         'sales_by_genre_table': read_sales_by_genre(),
     }
     return render_template('alltime_sales.html', context=context, **kwargs)
-
-
 
 
 if __name__ == '__main__':
