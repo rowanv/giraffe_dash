@@ -1,21 +1,20 @@
 from flask import Markup
-from sqlalchemy.engine import create_engine
 import pandas as pd
 
 
 class ItemResponse:
     '''represents a response to a MySQL query from a database'''
 
-    def __init__(self, engine, query):
+    def __init__(self, connection, query):
         self.query = query
-        self.engine = engine
-        self.connection = engine.connect()
+        #self.engine = engine
+        self.connection = connection
 
 
 class SingleItemResponse(ItemResponse):
 
-    def __init__(self, engine, query):
-        ItemResponse.__init__(self, engine, query)
+    def __init__(self, connection, query):
+        ItemResponse.__init__(self, connection, query)
 
     def fetch_result(self):
         self.result = self.connection.execute(self.query)
@@ -25,30 +24,29 @@ class SingleItemResponse(ItemResponse):
 
 class TableItemResponse(ItemResponse):
 
-    def __init__(self, engine, query):
-        ItemResponse.__init__(self, engine, query)
+    def __init__(self, connection, query):
+        ItemResponse.__init__(self, connection, query)
 
     def fetch_table(self):
-        df = pd.read_sql(self.query, self.engine)
+        df = pd.read_sql(self.query, self.connection.connection)
         return df
 
 
 class Vignette:
     '''Represents a single item of visual representation on dashboard'''
 
-    def __init__(self, engine, query):
+    def __init__(self, connection, query):
         self.query = query
-        self.engine = engine
-        self.connection = engine.connect()
+        self.connection = connection
 
 
 class IndicatorPanel(Vignette):
     '''Represents an indicator panel vignette in dashboard'''
 
-    def __init__(self, engine, query):
-        Vignette.__init__(self, engine, query)
+    def __init__(self, connection, query):
+        Vignette.__init__(self, connection, query)
         if query is not None:
-            self.panel_num = SingleItemResponse(engine, query).fetch_result()
+            self.panel_num = SingleItemResponse(connection, query).fetch_result()
         self.panel_colour_to_class_mapping = {
             'blue': 'panel-primary',
             'green': 'panel-green',
@@ -98,9 +96,9 @@ class IndicatorPanel(Vignette):
 
 class Table(Vignette):
 
-    def __init__(self, engine, query):
-        Vignette.__init__(self, engine, query)
-        self.response = TableItemResponse(engine, self.query)
+    def __init__(self, connection, query):
+        Vignette.__init__(self, connection, query)
+        self.response = TableItemResponse(connection, self.query)
         self.df = self.response.fetch_table()
 
     def get_html_rep(self, columns):
