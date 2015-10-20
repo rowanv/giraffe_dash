@@ -19,6 +19,19 @@ Bower(app)
 engine = create_engine('mysql+pymysql://root@localhost/sakila')
 connection = engine.connect()
 
+#TODO:
+# - Fix time labels on sales: recent: sales over time graph
+# - Add chart to overview page
+# Add 3 tables to overview page
+# Deploy
+# Handle disconnect from db
+
+# Read up on flask-sqlalchemy vs. pure sqlalchemy
+# - Add all-time sales chart
+# Then fix all-time sales layout
+# Implement search functionality
+# Change messages from lorem ipsum
+# Add table to recent sales
 
 ##############
 # Customers
