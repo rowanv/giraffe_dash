@@ -1,8 +1,8 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import keys
+from selenium.webdriver.common.keys import Keys
 import unittest
-import urllib2
-from flask import flask
+#import urllib2
+from flask import Flask
 from flask.ext.testing import LiveServerTestCase
 
 
@@ -24,4 +24,3 @@ class FunctionalTest(LiveServerTestCase):
 
 	def tearDown(self):
 		self.browser.quit()
-

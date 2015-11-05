@@ -16,4 +16,5 @@ class NewVisitorTest(unittest.TestCase):
 		self.browser.quit()
 
 	def test_index_page_resolves():
-		
+		pass
+

@@ -25,6 +25,8 @@ connection = engine.connect()
 # Add 3 tables to overview page
 # Deploy
 # Handle disconnect from db
+# Unit tests new models
+# Add FT
 
 # Read up on flask-sqlalchemy vs. pure sqlalchemy
 # - Add all-time sales chart
