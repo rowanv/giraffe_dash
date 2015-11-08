@@ -18,6 +18,7 @@ class TestCase(LiveServerTestCase):
 
 	def setUp(self):
 		self.driver = webdriver.Firefox()
+		self.driver.implicitly_wait(3)
 
 	def tearDown(self):
 		self.driver.close()
@@ -50,6 +51,16 @@ class TestCase(LiveServerTestCase):
 		response = urlopen(self.get_server_url() + '/inventory.html')
 		self.assertEqual(response.code, 200)
 		#self.assertTemplateUsed(response, 'inventory.html')
+
+
+	def test_layout_and_styling(self):
+		self.driver.get(self.get_server_url())
+		self.driver.set_window_size(1024, 768)
+
+		header = self.driver.find_element_by_class_name('navbar-brand')
+		self.assertEqual(header.text, 'Business Metrics Dashboard')
+		header_color = header.value_of_css_property('color')
+		self.assertEqual(header_color, 'rgba(119, 119, 119, 1)')
 
 
 
