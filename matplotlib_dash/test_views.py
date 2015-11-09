@@ -23,13 +23,15 @@ class HomePageTest(unittest.TestCase):
 		response = self.tester.get('/recent_sales.html')
 		assert 'Sales Over Time: Last Month' in response.data.decode('UTF-8')
 
+
 	def test_all_time_sales_contains_indicator_panels(self):
 		response = self.tester.get('/alltime_sales.html')
 		assert 'All-Time Rentals' in response.data.decode('UTF-8')
+		assert 'All-Time Sales' in response.data.decode('UTF-8')
 
 	def test_all_time_sales_contains_vingettes(self):
 		response = self.tester.get('/alltime_sales.html')
-		assert 'Sales by Genre' in response.data.decode('UTF-8')
+		assert 'All-Time Sales per Unit in Stock, by Genre' in response.data.decode('UTF-8')
 
 	def test_employees_contains_indicator_panels(self):
 		response = self.tester.get('/employees.html')

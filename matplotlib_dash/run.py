@@ -26,7 +26,7 @@ connection = engine.connect()
 # Deploy
 # Handle disconnect from db
 # Unit tests new models
-# Add FT
+# Move tests out into own module
 
 # Read up on flask-sqlalchemy vs. pure sqlalchemy
 # - Add all-time sales chart
@@ -34,6 +34,9 @@ connection = engine.connect()
 # Implement search functionality
 # Change messages from lorem ipsum
 # Add table to recent sales
+
+# Set up DB on axolotl
+# Connect to axolotl DB
 
 ##############
 # Customers
@@ -92,6 +95,20 @@ def read_sales_last_month_over_time():
     table.df = table.df[['day(payment_date)', 'sum(amount)']]
     columns = ['Day', 'Payments']
     result_json = table.get_json_rep(columns)
+    return result_json
+
+def read_sales_over_inventory():
+    table_sales_by_category = Table(connection,
+        q.query_sales_by_movie)
+    table_inventory_by_category = Table(connection,
+        q.query_movie_inventory_by_category)
+    table_inventory_by_category.df.columns = ['category_id', 'name',
+        'inventory_count']
+    table_sales_by_category.df['sales_over_inventory'] = \
+        table_sales_by_category.df['total_sales'] / \
+        table_inventory_by_category.df['inventory_count']
+    columns = ['Category', 'Total Sales', 'Sales Over Inventory']
+    result_json = table_sales_by_category.get_json_rep(columns)
     return result_json
 
 
@@ -321,6 +338,7 @@ def alltime_sales(**kwargs):
             yellow_panel.get_html_rep(),
         ],
         'sales_by_genre_table': read_sales_by_genre(),
+        'sales_over_inventory_json': read_sales_over_inventory(),
     }
     return render_template('alltime_sales.html', context=context, **kwargs)
 

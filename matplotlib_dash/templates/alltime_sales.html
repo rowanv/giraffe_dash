@@ -16,25 +16,40 @@
 
 {% block body_panels %}
 
-<div class = 'row'>
-	                <div class="col-lg-6">
+                <div class = 'row'>
+	                <div class="col-lg-4">
 
-                	<div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Sales by Genre
+                    	<div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-bar-chart-o fa-fw"></i> Sales by Genre
+                            </div>
+                            <div class="panel-body">
+
+    								{{ context.sales_by_genre_table }}
+
+                            </div>
+                    		<!-- /.panel-body -->
                         </div>
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-lg-6">
+                        <!-- /.panel -->
+                    </div>
+                    <!-- /.col-lg-4 -->
+                    <div class='col-lg-8'>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-bar-chart-o fa-fw"></i> All-Time Sales per Unit in Stock, by Genre
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
 
 
-								{{ context.sales_by_genre_table }}
 
-								</div>
-							</div>
+                                    <div id='sales_over_inventory', style='height: 250px;'></div>
+
+
+                                </div>
                             <!-- /.row -->
                         </div>
-                		<!-- /.panel-body -->
+                        <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
                 </div>
@@ -42,5 +57,25 @@
 
             </div>
 
+
+{% endblock %}
+
+{% block end_scripts %}
+<script>
+
+console.log({{ context.sales_over_inventory_json }});
+
+new Morris.Bar({
+    element: 'sales_over_inventory',
+    data: {{ context.sales_over_inventory_json }},
+    xkey: 'Category',
+    ykeys: ['Sales Over Inventory'],
+    labels: ['Dollars per Unit in Stock'],
+    axes: true,
+    resize: true,
+    parseTime: false,
+
+});
+</script>
 
 {% endblock %}
