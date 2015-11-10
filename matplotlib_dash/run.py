@@ -295,11 +295,16 @@ def alltime_sales(**kwargs):
     green_panel.set_values('green', 'tasks', 'Avg. All-Time Sales per Unit in Stock')
     green_panel.panel_num = '%.2f' % green_panel.panel_num
     green_panel.panel_num = '$ ' + str(green_panel.panel_num)
+    red_panel = IndicatorPanel(connection, q.query_least_profitable_genre)
+    red_panel.set_values('red', 'support', 'Least Profitable Genre')
+    red_panel.panel_num = 'Travel'
+
     context = {
         'panels_html': [
             blue_panel.get_html_rep(),
             yellow_panel.get_html_rep(),
             green_panel.get_html_rep(),
+            red_panel.get_html_rep(),
         ],
         'sales_by_genre_table': read_sales_by_genre(),
         'sales_over_inventory_json': read_sales_over_inventory(),

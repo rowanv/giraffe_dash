@@ -97,6 +97,17 @@ from film f join inventory i on f.film_id = i.film_id
 group by f.film_id) a) as sales_over_units;
 '''
 
+#Note: not pulling least profitable genre
+query_least_profitable_genre = '''
+select (select sum(amount) as all_time_sales
+from payment p) /
+(select count(*) as all_units
+from (
+select f.film_id, count(*)
+from film f join inventory i on f.film_id = i.film_id
+group by f.film_id) a) as sales_over_units;
+'''
+
 ################
 # Inventory
 ################
