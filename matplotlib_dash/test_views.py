@@ -32,7 +32,7 @@ class HomePageTest(unittest.TestCase):
 	def test_all_time_sales_contains_vingettes(self):
 		response = self.tester.get('/alltime_sales.html')
 		assert 'All-Time Sales per Unit in Stock, by Genre' in response.data.decode('UTF-8')
-		assert 'Average All-Time Sales per Unit in Stock' in response.data.decode('UTF-8')
+		assert 'Avg. All-Time Sales per Unit in Stock' in response.data.decode('UTF-8')
 
 	def test_employees_contains_indicator_panels(self):
 		response = self.tester.get('/employees.html')

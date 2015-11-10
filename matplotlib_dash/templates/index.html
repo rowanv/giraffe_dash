@@ -16,10 +16,41 @@
 
             <div class="row">
                 <div class="col-lg-8">
-                {{ context.line_graph_html }}
+
+                        <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Inventory by Genre
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="films_by_category"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Bar Chart Example
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Most Recent Transactions
                             <div class="pull-right">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -148,8 +179,29 @@
 {% endblock %}
 
 {% block end_scripts %}
-<script src="{{ url_for('static', filename='js/morris-data.js') }}"></script>
+
+
 <script>
+new Morris.Bar({
+  // ID of the element in which to draw the chart.
+  element: 'films_by_category',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+  data: {{ context.table_films_by_category }},
+  // The name of the data record attribute that contains x-values.
+  xkey: 'Category',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['Inventory Count'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Inventory Count'],
+  //parseTime: false,
+  axes: true,
+  resize: true,
+  parseTime: false,
+
+});
+
 new Morris.Donut({
   element: 'donut-chart',
   // Chart data records -- each entry in this array corresponds to a point on

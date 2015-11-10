@@ -154,47 +154,6 @@ def read_sales_by_employee_over_time():
 ################
 
 
-def morris_line():
-    '''
-    chart_id: id element for html
-    chart_data: data in JSON format
-        returns: tuple with HTML data for chart , JS script for chart
-    '''
-    line_graph_html = '''
-    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Area Chart Example
-                            <div class="pull-right">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                                        Actions
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu pull-right" role="menu">
-                                        <li><a href="#">Action</a>
-                                        </li>
-                                        <li><a href="#">Another action</a>
-                                        </li>
-                                        <li><a href="#">Something else here</a>
-                                        </li>
-                                        <li class="divider"></li>
-                                        <li><a href="#">Separated link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div id="morris-area-chart"></div>
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
-    '''
-    line_graph_html = Markup(line_graph_html)
-    return line_graph_html
-
 
 # Dashboard Views
 
@@ -219,12 +178,12 @@ def index(**kwargs):
         yellow_panel.get_html_rep(),
         red_panel.get_html_rep(),
     ],
-        'line_graph_html': morris_line(),
         'donut_chart': {'active_customers':
                         read_number_active_customers(),
                         'inactive_customers':
                         read_customers_lost_last_month(),
                         },
+        'table_films_by_category': read_films_in_inventory_by_category(),
     }
     return render_template('index.html', context=context, **kwargs)
 
@@ -333,7 +292,7 @@ def alltime_sales(**kwargs):
     yellow_panel.set_values('yellow', 'shopping_cart', 'All-Time Sales')
     yellow_panel.panel_num = '$ ' + str(yellow_panel.panel_num)
     green_panel = IndicatorPanel(connection, q.query_all_time_sales_over_units)
-    green_panel.set_values('green', 'tasks', 'Average All-Time Sales per Unit in Stock')
+    green_panel.set_values('green', 'tasks', 'Avg. All-Time Sales per Unit in Stock')
     green_panel.panel_num = '%.2f' % green_panel.panel_num
     green_panel.panel_num = '$ ' + str(green_panel.panel_num)
     context = {
