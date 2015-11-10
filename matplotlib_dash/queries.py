@@ -87,6 +87,16 @@ where month(payment_date) = 7
 group by year(payment_date), month(payment_date), day(payment_date)
 '''
 
+query_all_time_sales_over_units = '''
+select (select sum(amount) as all_time_sales
+from payment p) /
+(select count(*) as all_units
+from (
+select f.film_id, count(*)
+from film f join inventory i on f.film_id = i.film_id
+group by f.film_id) a) as sales_over_units;
+'''
+
 ################
 # Inventory
 ################

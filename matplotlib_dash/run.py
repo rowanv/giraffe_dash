@@ -332,10 +332,15 @@ def alltime_sales(**kwargs):
     yellow_panel = IndicatorPanel(connection, q.query_sales_all_time)
     yellow_panel.set_values('yellow', 'shopping_cart', 'All-Time Sales')
     yellow_panel.panel_num = '$ ' + str(yellow_panel.panel_num)
+    green_panel = IndicatorPanel(connection, q.query_all_time_sales_over_units)
+    green_panel.set_values('green', 'tasks', 'Average All-Time Sales per Unit in Stock')
+    green_panel.panel_num = '%.2f' % green_panel.panel_num
+    green_panel.panel_num = '$ ' + str(green_panel.panel_num)
     context = {
         'panels_html': [
             blue_panel.get_html_rep(),
             yellow_panel.get_html_rep(),
+            green_panel.get_html_rep(),
         ],
         'sales_by_genre_table': read_sales_by_genre(),
         'sales_over_inventory_json': read_sales_over_inventory(),
