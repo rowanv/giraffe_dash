@@ -16,7 +16,7 @@ app = Flask(__name__, static_url_path='/static/dist')
 Bower(app)
 
 
-engine = create_engine('mysql+pymysql://root@localhost/sakila')
+engine = create_engine('mysql+pymysql://rowan:JgR8NFY%ErNaYew2ERzE@127.0.0.1/sakila')
 connection = engine.connect()
 
 #TODO:
@@ -313,4 +313,4 @@ def alltime_sales(**kwargs):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0')
