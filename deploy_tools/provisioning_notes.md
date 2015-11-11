@@ -31,4 +31,13 @@ sed "s/SITENAME/dash.rowanv.com/g" \
     deploy_tools/nginx.template.conf | sudo tee \
     /etc/nginx/sites-available/dash.rowanv.com
 
+sudo ln -s ../sites-available/dash.rowanv.com \
+    /etc/nginx/sites-enabled/dash.rowanv.com
 
+sed "s/SITENAME/dash.rowanv.com/g" \
+    deploy_tools/gunicorn-upstart.template.conf | sudo tee \
+    /etc/init/gunicorn-dash.rowanv.com.conf
+
+sudo service nginx reload
+sudo start gunicorn-dash.rowanv.com
+# or sudo restart gunicorn-dash.rowanv.com
