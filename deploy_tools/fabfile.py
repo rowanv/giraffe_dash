@@ -15,7 +15,7 @@ def deploy():
     #_update_database(source_folder)
 
 def _create_directory_structure_if_necessary(site_folder):
-    for subfolder in ('database', 'static', 'virtualenv', 'source'):
+    for subfolder in ('database', 'static', 'virtualenv', 'source', 'bower_components'):
         run('mkdir -p %s/%s' % (site_folder, subfolder))
 
 def _get_latest_source(source_folder):
@@ -51,6 +51,8 @@ def _update_virtualenv(source_folder):
 def _update_static_files(source_folder):
     run('cd %s && ../virtualenv/bin/python3 manage.py collect ' % ( # 1
         source_folder,
+    ))
+    run('cd %s && cp bower_components/* ../bower_components/' % (source_folder,
     ))
 '''
 def _update_database(source_folder):
