@@ -52,7 +52,8 @@ def _update_static_files(source_folder):
     run('cd %s && ../virtualenv/bin/python3 manage.py collect ' % ( # 1
         source_folder,
     ))
-    run('cd %s && cp bower_components/* ../bower_components/' % (source_folder,
+    run('cd %s && cp bower_components/* ../bower_components/ --recursive' % (
+        source_folder,
     ))
 '''
 def _update_database(source_folder):

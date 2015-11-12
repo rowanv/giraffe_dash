@@ -12,7 +12,7 @@ from models import SingleItemResponse, TableItemResponse, Table, IndicatorPanel
 import queries as q
 
 # set static folder
-app = Flask(__name__, static_url_path='/static/dist')
+app = Flask(__name__, static_url_path='/static/')
 Bower(app)
 
 
