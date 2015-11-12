@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import yaml
 from flask import Flask, make_response, render_template, send_from_directory, Markup
 from flask.ext.bower import Bower
 
@@ -11,12 +12,22 @@ from math import ceil
 from models import SingleItemResponse, TableItemResponse, Table, IndicatorPanel
 import queries as q
 
+#Read in configs
+with open('config.yml', 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+user = cfg['user']
+passwd = cfg['passwd']
+db = cfg['db']
+host = cfg['host']
+
+
 # set static folder
 app = Flask(__name__, static_url_path='/static/')
 Bower(app)
 
-
-engine = create_engine('mysql+pymysql://rowan:JgR8NFY%ErNaYew2ERzE@127.0.0.1/sakila')
+#engine = create_engine('mysql+pymysql://rowan:JgR8NFY%ErNaYew2ERzE@127.0.0.1/sakila')
+engine = create_engine('mysql+pymysql://' + user + ':' + passwd + '@' + host + '/' + db)
 connection = engine.connect()
 
 #TODO:
