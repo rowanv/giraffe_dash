@@ -2,6 +2,8 @@ brewer2mpl==1.4.1
 Cython==0.23.4
 Flask==0.10.1
 Flask-Bower==1.2.1
+Flask-Collect==1.2.2
+Flask-Script==2.0.5
 gunicorn==19.3.0
 itsdangerous==0.24
 Jinja2==2.8
