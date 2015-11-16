@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 import yaml
-from flask import Flask, make_response, render_template, send_from_directory, Markup
+from flask import Flask, render_template, Markup
 from flask.ext.bower import Bower
 
 from sqlalchemy.engine import create_engine
-from pandas.io.sql import read_sql
-import pandas as pd
-import brewer2mpl
-from math import ceil
 
-from models import SingleItemResponse, TableItemResponse, Table, IndicatorPanel
+from models import SingleItemResponse, Table, IndicatorPanel
 import queries as q
 
-#Read in configs
+# Read in configs
 with open('config.yml', 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
@@ -26,11 +22,11 @@ host = cfg['host']
 app = Flask(__name__, static_url_path='/static/')
 Bower(app)
 
-#engine = create_engine('mysql+pymysql://rowan:JgR8NFY%ErNaYew2ERzE@127.0.0.1/sakila')
-engine = create_engine('mysql+pymysql://' + user + ':' + passwd + '@' + host + '/' + db)
+engine = create_engine('mysql+pymysql://' + user + ':' + passwd +
+                      '@' + host + '/' + db)
 connection = engine.connect()
 
-#TODO:
+# TODO:
 # - Fix time labels on sales: recent: sales over time graph
 # - Add chart to overview page
 # Add 3 tables to overview page
@@ -46,8 +42,6 @@ connection = engine.connect()
 # Change messages from lorem ipsum
 # Add table to recent sales
 
-# Set up DB on axolotl
-# Connect to axolotl DB
 
 ##############
 # Customers
@@ -60,17 +54,20 @@ def read_customers_added_last_month():
     result = response.fetch_result()
     return result
 
+
 def read_customers_lost_last_month():
     response = SingleItemResponse(connection,
                                   q.query_customers_lost_last_month)
     result = response.fetch_result()
     return result
 
+
 def read_number_active_customers():
     response = SingleItemResponse(connection,
                                   q.query_active_customers)
     result = response.fetch_result()
     return result
+
 
 def calc_customer_retention_rate():
     cust_added = read_customers_added_last_month()
@@ -79,11 +76,13 @@ def calc_customer_retention_rate():
     retention_rate = '%.2f' % (retention_rate)
     return str(retention_rate) + '%'
 
+
 def read_customers_by_country():
     this_table = Table(connection, q.query_customers_by_country)
     columns = ['Country', 'Number of Customers']
     html_rep = this_table.get_html_rep(columns)
     return html_rep
+
 
 def read_customers_lost_by_country():
     this_table = Table(connection, q.query_customers_lost_by_country)
@@ -95,11 +94,13 @@ def read_customers_lost_by_country():
 # Sales
 ##########
 
+
 def read_sales_by_genre():
     this_table = Table(connection, q.query_sales_by_movie)
     columns = ['Category', 'Total Sales']
     html_rep = this_table.get_html_rep(columns)
     return html_rep
+
 
 def read_sales_last_month_over_time():
     table = Table(connection, q.query_payments_by_date_month)
@@ -107,6 +108,7 @@ def read_sales_last_month_over_time():
     columns = ['Day', 'Payments']
     result_json = table.get_json_rep(columns)
     return result_json
+
 
 def read_sales_over_inventory():
     table_sales_by_category = Table(connection,
@@ -134,11 +136,13 @@ def read_films_in_inventory_by_category():
     result_json = table.get_json_rep(columns)
     return result_json
 
+
 def read_films_in_inventory_by_store():
     table = Table(connection, q.query_films_in_inventory_by_store)
     columns = ['Store ID', 'Number of Films']
     result_json = table.get_json_rep(columns)
     return result_json
+
 
 def read_films_in_inventory_most_rented():
     this_table = Table(connection, q.query_top_rented_films)
@@ -155,7 +159,7 @@ def read_sales_by_employee_over_time():
     table = Table(connection, q.query_rental_by_staff)
     table.df = table.df[['staff_id', 'month(rental_date)', 'total_sales']]
     table.df = table.df.pivot(index='month(rental_date)',
-                          columns='staff_id', values='total_sales')
+                              columns='staff_id', values='total_sales')
     table.df = table.df.reset_index()
     result_json = table.df.to_json(orient='records')
     return Markup(result_json)
@@ -163,7 +167,6 @@ def read_sales_by_employee_over_time():
 ################
 # Chart Views
 ################
-
 
 
 # Dashboard Views
@@ -203,7 +206,8 @@ def index(**kwargs):
 def customers(**kwargs):
     yellow_panel = IndicatorPanel(connection, q.query_active_customers)
     yellow_panel.set_values('yellow', 'shopping_cart', 'Active Customers')
-    green_panel = IndicatorPanel(connection, q.query_customers_added_last_month)
+    green_panel = IndicatorPanel(connection,
+                                q.query_customers_added_last_month)
     green_panel.set_values('green', 'tasks', 'Customers Gained Last Month')
     red_panel = IndicatorPanel(connection, q.query_customers_lost_last_month)
     red_panel.set_values('red', 'support', 'Customers Lost Last Month')
@@ -303,7 +307,8 @@ def alltime_sales(**kwargs):
     yellow_panel.set_values('yellow', 'shopping_cart', 'All-Time Sales')
     yellow_panel.panel_num = '$ ' + str(yellow_panel.panel_num)
     green_panel = IndicatorPanel(connection, q.query_all_time_sales_over_units)
-    green_panel.set_values('green', 'tasks', 'Avg. All-Time Sales per Unit in Stock')
+    green_panel.set_values('green', 'tasks', 'Avg. All-Time Sales per Unit in '
+        'Stock')
     green_panel.panel_num = '%.2f' % green_panel.panel_num
     green_panel.panel_num = '$ ' + str(green_panel.panel_num)
     red_panel = IndicatorPanel(connection, q.query_least_profitable_genre)
