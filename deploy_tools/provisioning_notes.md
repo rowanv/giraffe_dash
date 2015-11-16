@@ -24,6 +24,8 @@ e.g., on Ubuntu:
 ## on my machine
 
 fab deploy --host=rowan@dash.rowanv.com
+scp ../config.yml rowan@188.166.1.249:~/sites/dash.rowanv.com/source/
+
 
 ## Then on the actual server, within source for the website
 
@@ -39,8 +41,9 @@ sed "s/SITENAME/dash.rowanv.com/g" \
     /etc/init/gunicorn-dash.rowanv.com.conf
 
 sudo service nginx reload
-sudo start gunicorn-dash.rowanv.com
-# or sudo restart gunicorn-dash.rowanv.com
+#sudo start gunicorn-dash.rowanv.com
+# or once have started:
+sudo restart gunicorn-dash.rowanv.com
 # Actually, currently starting gunicorn with:
 # ../virtualenv/bin/gunicorn -w 4 -b 0.0.0.0:5000 run:app -D
 # To view running gunicorn processes:
