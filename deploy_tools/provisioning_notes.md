@@ -44,7 +44,7 @@ sudo service nginx reload
 #sudo start gunicorn-dash.rowanv.com
 # or once have started:
 sudo restart gunicorn-dash.rowanv.com
-# Actually, currently starting gunicorn with:
+# Before, was starting gunicorn with:
 # ../virtualenv/bin/gunicorn -w 4 -b 0.0.0.0:5000 run:app -D
 # To view running gunicorn processes:
 # ps ax|grep gunicorn
