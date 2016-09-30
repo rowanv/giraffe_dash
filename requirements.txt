@@ -3,6 +3,7 @@ Flask==0.10.1
 Flask-Bower==1.2.1
 Flask-Collect==1.2.2
 Flask-Script==2.0.5
+Flask-Testing==0.4.2
 gunicorn==19.3.0
 itsdangerous==0.24
 Jinja2==2.8
@@ -13,6 +14,7 @@ pandas==0.17.0
 PyMySQL==0.6.7
 python-dateutil==2.4.2
 pytz==2015.7
+selenium==2.53.6
 six==1.10.0
 SQLAlchemy==1.0.9
 Werkzeug==0.11.1
